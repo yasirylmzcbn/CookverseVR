@@ -223,6 +223,11 @@ MonoBehaviour:
   useTagFiltering: 0
   parentToShelf: 0
   yOffset: 0
+  makeItemsPickupable: 1
+  interactionLayers:
+    m_Bits: 1
+  movementType: 2
+  enableThrowing: 1
 --- !u!1001 &6986378
 PrefabInstance:
   m_ObjectHideFlags: 0
