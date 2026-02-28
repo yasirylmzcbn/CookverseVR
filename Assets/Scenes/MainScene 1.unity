@@ -131,6 +131,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: StorageRoom
       objectReference: {fileID: 0}
+    - target: {fileID: 3150293545552987023, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 6153791730072046484, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7635774556107726851, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7813099515693883130, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -141,7 +153,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7813099515693883130, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.025
       objectReference: {fileID: 0}
     - target: {fileID: 7813099515693883130, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_LocalRotation.w
@@ -174,13 +186,48 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5065034025367727628, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5618447}
   m_SourcePrefab: {fileID: 100100000, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
 --- !u!4 &5618445 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7813099515693883130, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
   m_PrefabInstance: {fileID: 5618444}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5618446 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5065034025367727628, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+  m_PrefabInstance: {fileID: 5618444}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5618447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5618446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d65d316ff5d5444c9f8a38f86f4aeff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  shelfItemPrefabs:
+  - {fileID: 8890508618791391049, guid: ca29c74284c40524f8edb533636550f9, type: 3}
+  - {fileID: 1485319667670839895, guid: faddb7582ea378c44a767cc63fe84c89, type: 3}
+  - {fileID: 1562450511784550434, guid: 90dd31c36f3997d46bb4fbbc7884b624, type: 3}
+  - {fileID: 5028759993301923343, guid: 85938f0c69ec2764089c4ae07951faf6, type: 3}
+  - {fileID: 5214559279995241855, guid: 83aad64f3f078194b97e33a1d49fb2b5, type: 3}
+  propTag: ShelfProp
+  useTagFiltering: 0
+  parentToShelf: 0
+  yOffset: 0
+  makeItemsPickupable: 1
+  interactionLayers:
+    m_Bits: 1
+  movementType: 2
+  enableThrowing: 1
 --- !u!1001 &6986378
 PrefabInstance:
   m_ObjectHideFlags: 0
