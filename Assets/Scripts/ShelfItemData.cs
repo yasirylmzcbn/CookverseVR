@@ -33,6 +33,7 @@ public class ShelfItemData : MonoBehaviour
     }
 }
 
+// Names of the food items that are eligible in the navigation challenge
 public enum ItemType
 {
     Food_Apple,
