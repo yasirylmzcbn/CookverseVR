@@ -33,11 +33,22 @@ public class ShelfItemData : MonoBehaviour
     }
 }
 
+// Names of the food items that are eligible in the navigation challenge
 public enum ItemType
 {
     Food_Apple,
     Food_Cheese,
     Food_Tomato,
     Food_Bread,
-    Food_SearedGroundBeef
+    Food_SearedGroundBeef,
+    Food_Egg,
+    Food_Carrot,
+    Food_Broccoli,
+    Food_Sausage,
+    Food_Lettuce,
+    Food_Ribs,
+    Food_Steak,
+    Food_Corn,
+    Food_Oil,
+    Food_Milk
 }

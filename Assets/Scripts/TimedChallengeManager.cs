@@ -6,7 +6,8 @@ public class TimedChallengeManager : MonoBehaviour
     public static TimedChallengeManager Instance;
 
     [Header("Challenge Settings")]
-    public float challengeDuration = 10f;
+    public float challengeDuration = 60f;
+    public int roundsRequired = 3;
 
     [Header("References")]
     public ShelfItemsManager shelfManager;
@@ -15,6 +16,7 @@ public class TimedChallengeManager : MonoBehaviour
 
     private float timer;
     private bool challengeActive;
+    private int roundsWon;
 
     private ItemType currentTarget;
 
@@ -23,6 +25,7 @@ public class TimedChallengeManager : MonoBehaviour
         Instance = this;
     }
 
+    // Updates the timer value
     private void Update()
     {
         if (!challengeActive) return;
@@ -37,12 +40,14 @@ public class TimedChallengeManager : MonoBehaviour
         }
     }
 
+    // Begin the challenge when the player interacts with the button
     public void StartChallenge()
     {
         if (challengeActive) return;
 
         challengeActive = true;
         timer = challengeDuration;
+        roundsWon = 0;
 
         // Make UI visible
         if (timerText != null)
@@ -50,32 +55,47 @@ public class TimedChallengeManager : MonoBehaviour
         if (targetText != null)
             targetText.gameObject.SetActive(true);
 
-        // Refresh shelf items each round
-        if (shelfManager != null)
-            shelfManager.RefreshItems();
+        // Refresh shelf items when a new challenge is activated
+        shelfManager.RefreshItems();
 
         // Pick random target
+        PickNewTarget();
+    }
+
+    // For each round in the challenge, if the player grabs the right item, activates win condition/next round
+    private void PickNewTarget()
+    {
         currentTarget = (ItemType)Random.Range(
             0, System.Enum.GetValues(typeof(ItemType)).Length
         );
 
-        // Update UI
-        if (targetText != null)
-            targetText.text = "Find: " + FormatEnumName(currentTarget.ToString());
-        if (timerText != null)
-            timerText.text = "Time: " + timer.ToString("F1");
+        targetText.text =
+            "Round " + (roundsWon + 1) + "/" + roundsRequired +
+            "\nFind: " + FormatEnumName(currentTarget.ToString());
     }
 
+    // If the item picked up is the correct item, then you win a round
     public void ItemCollected(ItemType collectedItem)
     {
         if (!challengeActive) return;
 
         if (collectedItem == currentTarget)
         {
-            ChallengeSuccess();
+            roundsWon++;
+
+            if (roundsWon >= roundsRequired)
+            {
+                ChallengeSuccess();
+            }
+            else
+            {
+                // Next round begins
+                PickNewTarget();
+            }
         }
     }
 
+    // Win Condition: complete 3 rounds within the time limit
     private void ChallengeSuccess()
     {
         challengeActive = false;
@@ -86,6 +106,7 @@ public class TimedChallengeManager : MonoBehaviour
         Invoke("HideUI", 2f);
     }
 
+    // Lose condition: if you don't complete 3 rounds within the time limit
     private void ChallengeFailed()
     {
         challengeActive = false;
@@ -96,6 +117,7 @@ public class TimedChallengeManager : MonoBehaviour
         Invoke("HideUI", 2f);
     }
 
+    // Hides the UI for the time challenge
     private void HideUI()
     {
         if (timerText != null)
@@ -104,6 +126,7 @@ public class TimedChallengeManager : MonoBehaviour
             targetText.gameObject.SetActive(false);
     }
 
+    // Enumerates the ingredient names for display on the UI
     private string FormatEnumName(string rawName)
     {
         // Remove prefix like "Food_"
