@@ -16619,7 +16619,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1031439568
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23703,7 +23703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 412f26d941bd71d4f91445459a8e8ca4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  challengeDuration: 10
+  challengeDuration: 30
   shelfManager: {fileID: 5618447}
   timerText: {fileID: 1031439569}
   targetText: {fileID: 2073773654}
@@ -33985,7 +33985,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2073773653
 RectTransform:
   m_ObjectHideFlags: 0

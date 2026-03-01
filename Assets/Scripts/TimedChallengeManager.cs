@@ -44,13 +44,26 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = true;
         timer = challengeDuration;
 
+        // Make UI visible
+        if (timerText != null)
+            timerText.gameObject.SetActive(true);
+        if (targetText != null)
+            targetText.gameObject.SetActive(true);
+
         // Refresh shelf items each round
-        shelfManager.RefreshItems();
+        if (shelfManager != null)
+            shelfManager.RefreshItems();
 
-        currentTarget = (ItemType)Random.Range(0,
-            System.Enum.GetValues(typeof(ItemType)).Length);
+        // Pick random target
+        currentTarget = (ItemType)Random.Range(
+            0, System.Enum.GetValues(typeof(ItemType)).Length
+        );
 
-        targetText.text = "Find: " + FormatEnumName(currentTarget.ToString());
+        // Update UI
+        if (targetText != null)
+            targetText.text = "Find: " + FormatEnumName(currentTarget.ToString());
+        if (timerText != null)
+            timerText.text = "Time: " + timer.ToString("F1");
     }
 
     public void ItemCollected(ItemType collectedItem)
@@ -68,6 +81,9 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = false;
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
+
+        // Hide after 2 seconds
+        Invoke("HideUI", 2f);
     }
 
     private void ChallengeFailed()
@@ -75,6 +91,17 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = false;
         targetText.text = "Failed!";
         Debug.Log("FAILED");
+
+        // Hide after 2 seconds
+        Invoke("HideUI", 2f);
+    }
+
+    private void HideUI()
+    {
+        if (timerText != null)
+            timerText.gameObject.SetActive(false);
+        if (targetText != null)
+            targetText.gameObject.SetActive(false);
     }
 
     private string FormatEnumName(string rawName)
