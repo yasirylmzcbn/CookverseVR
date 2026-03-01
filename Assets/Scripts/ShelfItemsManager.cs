@@ -197,6 +197,20 @@ public class ShelfItemsManager : MonoBehaviour
         {
             Debug.Log($"XRGrabInteractable already exists on {item.name}", item);
         }
+
+        ShelfItemData data = item.GetComponent<ShelfItemData>();
+
+        if (data != null)
+        {
+            grabInteractable.selectEntered.AddListener((args) =>
+            {
+                if (TimedChallengeManager.Instance != null)
+                {
+                    TimedChallengeManager.Instance
+                        .ItemCollected(data.itemType);
+                }
+            });
+        }
     }
 
     private void ConfigureGrabInteractable(XRGrabInteractable grabInteractable)
