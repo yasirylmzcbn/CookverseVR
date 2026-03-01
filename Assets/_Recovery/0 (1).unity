@@ -228,16 +228,6 @@ MonoBehaviour:
   - {fileID: 1562450511784550434, guid: 90dd31c36f3997d46bb4fbbc7884b624, type: 3}
   - {fileID: 5028759993301923343, guid: 85938f0c69ec2764089c4ae07951faf6, type: 3}
   - {fileID: 5214559279995241855, guid: 83aad64f3f078194b97e33a1d49fb2b5, type: 3}
-  - {fileID: 4077141521328887635, guid: 26dd2342357dc454bb29148a4339dd1d, type: 3}
-  - {fileID: 4797751799249303859, guid: 1473e8761428dcd44a8962866ef4fc6a, type: 3}
-  - {fileID: 2738341772031687196, guid: 23244ec81d1b60d4eb89d43c5a1606eb, type: 3}
-  - {fileID: 2596905523559583450, guid: e41b9cce28c2aa542abacad6d2c5af47, type: 3}
-  - {fileID: 5697800158797286517, guid: e27740dc0f71e6242933939d6050fd41, type: 3}
-  - {fileID: 4492821927860754639, guid: e65e0f5a23047e147be6dc32db77c4f1, type: 3}
-  - {fileID: 227577062100369360, guid: 78aa69274795dd6458edadb8e3efe5c3, type: 3}
-  - {fileID: 6452987395473004570, guid: ddc590ae56d02484faba95939304dc79, type: 3}
-  - {fileID: 2035933908921555893, guid: 4f166b533e80e054e839d72949c4a57c, type: 3}
-  - {fileID: 6791816518937276895, guid: 4caa6851baabe4f40bde9724dafa3b8e, type: 3}
   propTag: ShelfProp
   useTagFiltering: 0
   parentToShelf: 0

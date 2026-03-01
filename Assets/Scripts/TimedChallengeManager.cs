@@ -55,9 +55,7 @@ public class TimedChallengeManager : MonoBehaviour
             shelfManager.RefreshItems();
 
         // Pick random target
-        currentTarget = (ItemType)Random.Range(
-            0, System.Enum.GetValues(typeof(ItemType)).Length
-        );
+        currentTarget = (ItemType)Random.Range(0, System.Enum.GetValues(typeof(ItemType)).Length);
 
         // Update UI
         if (targetText != null)

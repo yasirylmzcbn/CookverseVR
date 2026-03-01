@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -3672967443013622043}
   m_Layer: 0
   m_Name: Food_Apple
-  m_TagString: Untagged
+  m_TagString: Pickup
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -126,3 +126,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10bf6d15a9609ea48b28e6b26fce8d4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  itemType: 0
+  displayName: 
