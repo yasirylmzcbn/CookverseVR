@@ -1783,8 +1783,9 @@ GameObject:
   - component: {fileID: 101556625}
   - component: {fileID: 101556624}
   - component: {fileID: 101556623}
+  - component: {fileID: 101556626}
   m_Layer: 0
-  m_Name: Sphere (10)
+  m_Name: Right1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1883,6 +1884,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 101556621}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &101556626
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 101556621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 1164242452}
+  - {fileID: 1911866759}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1 &105606053
 GameObject:
   m_ObjectHideFlags: 0
@@ -1895,6 +1913,7 @@ GameObject:
   - component: {fileID: 105606057}
   - component: {fileID: 105606056}
   - component: {fileID: 105606055}
+  - component: {fileID: 105606058}
   m_Layer: 0
   m_Name: KitchenCenterNode
   m_TagString: Untagged
@@ -1995,6 +2014,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 105606053}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &105606058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105606053}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 1344333944}
+  - {fileID: 1146976347}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &111601662
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3530,8 +3566,9 @@ GameObject:
   - component: {fileID: 233433003}
   - component: {fileID: 233433002}
   - component: {fileID: 233433001}
+  - component: {fileID: 233433004}
   m_Layer: 0
-  m_Name: Sphere (5)
+  m_Name: Left2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3630,6 +3667,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 233432999}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &233433004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233432999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 1050695402}
+  - {fileID: 303607418}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1 &233509617
 GameObject:
   m_ObjectHideFlags: 0
@@ -4846,8 +4900,9 @@ GameObject:
   - component: {fileID: 303607417}
   - component: {fileID: 303607416}
   - component: {fileID: 303607415}
+  - component: {fileID: 303607418}
   m_Layer: 0
-  m_Name: Sphere (6)
+  m_Name: Left3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4946,6 +5001,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 303607413}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &303607418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 303607413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 233433004}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1 &304048139
 GameObject:
   m_ObjectHideFlags: 0
@@ -4979,12 +5050,12 @@ Transform:
   - {fileID: 105606054}
   - {fileID: 1146976343}
   - {fileID: 1164242448}
-  - {fileID: 1050695398}
   - {fileID: 101556622}
   - {fileID: 1911866755}
   - {fileID: 1894309082}
   - {fileID: 2038908343}
   - {fileID: 828955846}
+  - {fileID: 1050695398}
   - {fileID: 233433000}
   - {fileID: 303607414}
   m_Father: {fileID: 0}
@@ -14011,8 +14082,9 @@ GameObject:
   - component: {fileID: 828955849}
   - component: {fileID: 828955848}
   - component: {fileID: 828955847}
+  - component: {fileID: 828955850}
   m_Layer: 0
-  m_Name: Sphere (9)
+  m_Name: Mid3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14111,6 +14183,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 828955845}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &828955850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 828955845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 2038908347}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &829391840
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17217,8 +17305,9 @@ GameObject:
   - component: {fileID: 1050695401}
   - component: {fileID: 1050695400}
   - component: {fileID: 1050695399}
+  - component: {fileID: 1050695402}
   m_Layer: 0
-  m_Name: Sphere (4)
+  m_Name: Left1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17317,6 +17406,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1050695397}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1050695402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1050695397}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 233433004}
+  - {fileID: 1164242452}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &1057146896
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19056,6 +19162,7 @@ GameObject:
   - component: {fileID: 1146976346}
   - component: {fileID: 1146976345}
   - component: {fileID: 1146976344}
+  - component: {fileID: 1146976347}
   m_Layer: 0
   m_Name: BeforeDoorwayNode
   m_TagString: Untagged
@@ -19156,6 +19263,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1146976342}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1146976347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1146976342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 105606058}
+  - {fileID: 1164242452}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &1148339688
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19385,8 +19509,9 @@ GameObject:
   - component: {fileID: 1164242451}
   - component: {fileID: 1164242450}
   - component: {fileID: 1164242449}
+  - component: {fileID: 1164242452}
   m_Layer: 0
-  m_Name: BackStorageNode
+  m_Name: Mid1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19485,6 +19610,25 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1164242447}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1164242452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1164242447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 1146976347}
+  - {fileID: 1050695402}
+  - {fileID: 2038908347}
+  - {fileID: 101556626}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1 &1164267129
 GameObject:
   m_ObjectHideFlags: 0
@@ -22367,6 +22511,7 @@ GameObject:
   - component: {fileID: 1344333943}
   - component: {fileID: 1344333942}
   - component: {fileID: 1344333941}
+  - component: {fileID: 1344333944}
   m_Layer: 0
   m_Name: CookNode
   m_TagString: Untagged
@@ -22467,6 +22612,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1344333939}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1344333944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1344333939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 105606058}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &1345259402
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -32342,8 +32503,9 @@ GameObject:
   - component: {fileID: 1894309085}
   - component: {fileID: 1894309084}
   - component: {fileID: 1894309083}
+  - component: {fileID: 1894309086}
   m_Layer: 0
-  m_Name: Sphere (12)
+  m_Name: Right3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32442,6 +32604,22 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1894309081}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1894309086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894309081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 1911866759}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &1898436890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -32750,8 +32928,9 @@ GameObject:
   - component: {fileID: 1911866758}
   - component: {fileID: 1911866757}
   - component: {fileID: 1911866756}
+  - component: {fileID: 1911866759}
   m_Layer: 0
-  m_Name: Sphere (11)
+  m_Name: Right2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32850,6 +33029,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1911866754}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1911866759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1911866754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 1894309086}
+  - {fileID: 101556626}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &1922156007
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -34143,8 +34339,9 @@ GameObject:
   - component: {fileID: 2038908346}
   - component: {fileID: 2038908345}
   - component: {fileID: 2038908344}
+  - component: {fileID: 2038908347}
   m_Layer: 0
-  m_Name: Sphere (8)
+  m_Name: Mid2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34243,6 +34440,23 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2038908342}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2038908347
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038908342}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a593cd11f77ce84685b968737529aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  connectedNodes:
+  - {fileID: 828955850}
+  - {fileID: 1164242452}
+  gizmoColor: {r: 0, g: 1, b: 0, a: 1}
+  showConnections: 1
 --- !u!1001 &2041193636
 PrefabInstance:
   m_ObjectHideFlags: 0
