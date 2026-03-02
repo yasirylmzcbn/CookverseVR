@@ -16,10 +16,48 @@ public class NodeScript : MonoBehaviour
     [Tooltip("Show node connections in the scene view")]
     public bool showConnections = true;
 
+    private static List<NodeScript> allNodes = new List<NodeScript>();
+
+    private void Awake()
+    {
+        if (!allNodes.Contains(this))
+        {
+            allNodes.Add(this);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        allNodes.Remove(this);
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        // Hide nodes by default until challenge starts
+        SetNodeVisibility(false);
+    }
+
+    private void SetNodeVisibility(bool visible)
+    {
+        // Hide/show all renderers on this node
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        foreach (Renderer renderer in renderers)
+        {
+            renderer.enabled = visible;
+        }
+    }
+
+    // Static method to show/hide all nodes
+    public static void SetAllNodesVisible(bool visible)
+    {
+        foreach (NodeScript node in allNodes)
+        {
+            if (node != null)
+            {
+                node.SetNodeVisibility(visible);
+            }
+        }
     }
 
     // Update is called once per frame
