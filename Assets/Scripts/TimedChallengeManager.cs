@@ -14,6 +14,10 @@ public class TimedChallengeManager : MonoBehaviour
     public ShelfItemsManager shelfManager;
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI targetText;
+    
+    [Header("Ingredient Distribution")]
+    [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
+    public IngredientDistributionManager ingredientDistribution;
 
     [Header("Pathfinding Settings")]
     [Tooltip("Transform to use as player position (e.g., XR Origin or Main Camera)")]
@@ -101,8 +105,16 @@ public class TimedChallengeManager : MonoBehaviour
         if (targetText != null)
             targetText.gameObject.SetActive(true);
 
-        // Refresh shelf items when a new challenge is activated
-        shelfManager.RefreshItems();
+        // Refresh shelf items with new ingredient distribution
+        if (ingredientDistribution != null)
+        {
+            ingredientDistribution.RefreshAllShelves();
+        }
+        else if (shelfManager != null)
+        {
+            // Fallback to old behavior if no distribution manager
+            shelfManager.RefreshItems();
+        }
 
         // Pick random target
         PickNewTarget();
@@ -141,9 +153,19 @@ public class TimedChallengeManager : MonoBehaviour
             return;
         }
 
-        // Use NodeScript to find the path from current player position
-        List<NodeScript> path = NodeScript.FindPathToClosestItem(playerTransform.position, currentTarget);
-        NavigationPathVisualizer.ShowPath(path);
+        // Use NodeScript to find the path and target item from current player position
+        var result = NodeScript.FindPathToClosestItemWithTarget(playerTransform.position, currentTarget);
+        List<NodeScript> path = result.path;
+        GameObject targetItem = result.targetItem;
+
+        // Show the path with line to target item
+        NavigationPathVisualizer.ShowPath(path, targetItem);
+
+        // Highlight the target item
+        if (targetItem != null)
+        {
+            TargetItemHighlighter.HighlightItem(targetItem);
+        }
     }
 
     // If the item picked up is the correct item, then you win a round
@@ -174,8 +196,9 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
 
-        // Hide path
+        // Hide path and clear highlight
         NavigationPathVisualizer.HidePath();
+        TargetItemHighlighter.ClearHighlight();
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
@@ -188,8 +211,9 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Failed!";
         Debug.Log("FAILED");
 
-        // Hide path
+        // Hide path and clear highlight
         NavigationPathVisualizer.HidePath();
+        TargetItemHighlighter.ClearHighlight();
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);

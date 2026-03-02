@@ -133,7 +133,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1277221226079182176, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_Name
-      value: Left2
+      value: Row2
       objectReference: {fileID: 0}
     - target: {fileID: 2169615902900994121, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_Name
@@ -141,7 +141,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2624908629829798537, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_Name
-      value: Left1
+      value: Row1
       objectReference: {fileID: 0}
     - target: {fileID: 3150293545552987023, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_LocalPosition.z
@@ -150,6 +150,10 @@ PrefabInstance:
     - target: {fileID: 3821139803560885974, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_LocalPosition.x
       value: -49.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 5065034025367727628, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      propertyPath: m_Name
+      value: RowsOfShelves
       objectReference: {fileID: 0}
     - target: {fileID: 5961446991008483158, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_LocalPosition.x
@@ -161,7 +165,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7129077647978252093, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_Name
-      value: Left3
+      value: Row3
       objectReference: {fileID: 0}
     - target: {fileID: 7635774556107726851, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_IsActive
@@ -209,7 +213,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8813691198663666490, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_Name
-      value: Left4
+      value: Row4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -225,6 +229,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7813099515693883130, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       insertIndex: -1
       addedObject: {fileID: 114797205}
+    - targetCorrespondingSourceObject: {fileID: 3150293545552987023, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1115729993}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5065034025367727628, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       insertIndex: -1
@@ -268,15 +275,22 @@ MonoBehaviour:
   - {fileID: 6452987395473004570, guid: ddc590ae56d02484faba95939304dc79, type: 3}
   - {fileID: 2035933908921555893, guid: 4f166b533e80e054e839d72949c4a57c, type: 3}
   - {fileID: 6791816518937276895, guid: 4caa6851baabe4f40bde9724dafa3b8e, type: 3}
+  - {fileID: 8041849481946025025, guid: c68bd0879681d2241845579839f5c99d, type: 3}
   propTag: ShelfProp
   useTagFiltering: 0
   parentToShelf: 0
   yOffset: 0
+  oneIngredientPerShelf: 0
   makeItemsPickupable: 1
   interactionLayers:
     m_Bits: 1
   movementType: 2
   enableThrowing: 1
+--- !u!4 &5618448 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3150293545552987023, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+  m_PrefabInstance: {fileID: 5618444}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6986378
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19532,6 +19546,53 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2467845069284678478, guid: 3c0b460c20e5c954d8523df4157882d1, type: 3}
   m_PrefabInstance: {fileID: 1112918562}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1115729992
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1115729993}
+  - component: {fileID: 1115729994}
+  m_Layer: 6
+  m_Name: IngredientDistribution
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1115729993
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1115729992}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5618448}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1115729994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1115729992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6c686ef213eff24e930fc25fa963493, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::IngredientDistributionManager
+  shelfManager: {fileID: 5618447}
+  rowsParent: {fileID: 5618448}
+  autoFindComponents: 1
 --- !u!1001 &1121352877
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25046,6 +25107,11 @@ MonoBehaviour:
   shelfManager: {fileID: 5618447}
   timerText: {fileID: 1031439569}
   targetText: {fileID: 2073773654}
+  ingredientDistribution: {fileID: 0}
+  playerTransform: {fileID: 0}
+  showPathToTarget: 1
+  pathUpdateInterval: 0.5
+  pathUpdateDistanceThreshold: 1
 --- !u!4 &1428933268
 Transform:
   m_ObjectHideFlags: 0

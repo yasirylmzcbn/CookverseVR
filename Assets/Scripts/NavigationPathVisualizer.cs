@@ -9,6 +9,7 @@ public static class NavigationPathVisualizer
 
     private static LineRenderer pathLineRenderer;
     private static GameObject pathLineObject;
+    private static GameObject currentTargetItem;
 
     // Initialize the LineRenderer for path visualization
     private static void InitializePathLineRenderer()
@@ -25,14 +26,26 @@ public static class NavigationPathVisualizer
         pathLineRenderer.positionCount = 0;
         pathLineRenderer.useWorldSpace = true;
 
-        // Create and assign material
-        Shader shader = Shader.Find("Unlit/Color");
-        if (shader == null)
-            shader = Shader.Find("Sprites/Default");
+        // Try to load the NavMaterial
+        Material navMaterial = Resources.Load<Material>("Materials/NavMaterial");
+        
+        if (navMaterial != null)
+        {
+            pathLineRenderer.material = navMaterial;
+            Debug.Log("PathVisualizer: Using NavMaterial");
+        }
+        else
+        {
+            // Fallback: Create a simple material if NavMaterial not found
+            Debug.LogWarning("PathVisualizer: NavMaterial not found at Resources/Materials/NavMaterial, using fallback material");
+            Shader shader = Shader.Find("Unlit/Color");
+            if (shader == null)
+                shader = Shader.Find("Sprites/Default");
 
-        Material lineMaterial = new Material(shader);
-        lineMaterial.color = pathColor;
-        pathLineRenderer.material = lineMaterial;
+            Material lineMaterial = new Material(shader);
+            lineMaterial.color = pathColor;
+            pathLineRenderer.material = lineMaterial;
+        }
 
         // Set gradient
         Gradient gradient = new Gradient();
@@ -45,8 +58,8 @@ public static class NavigationPathVisualizer
         pathLineRenderer.enabled = false;
     }
 
-    // Show the path visualization
-    public static void ShowPath(List<NodeScript> path)
+    // Show the path visualization with a line to the target item
+    public static void ShowPath(List<NodeScript> path, GameObject targetItem = null)
     {
         InitializePathLineRenderer();
 
@@ -56,8 +69,18 @@ public static class NavigationPathVisualizer
             return;
         }
 
-        pathLineRenderer.positionCount = path.Count;
+        currentTargetItem = targetItem;
 
+        // Calculate total positions: nodes + optional target item
+        int totalPositions = path.Count;
+        if (targetItem != null)
+        {
+            totalPositions++; // Add one more position for the target item
+        }
+
+        pathLineRenderer.positionCount = totalPositions;
+
+        // Set positions for all nodes
         for (int i = 0; i < path.Count; i++)
         {
             if (path[i] != null)
@@ -67,8 +90,20 @@ public static class NavigationPathVisualizer
             }
         }
 
+        // Add final line segment from last node to target item
+        if (targetItem != null)
+        {
+            pathLineRenderer.SetPosition(path.Count, targetItem.transform.position);
+        }
+
         pathLineRenderer.enabled = true;
-        Debug.Log($"PathVisualizer: Showing path with {path.Count} nodes");
+        Debug.Log($"PathVisualizer: Showing path with {path.Count} nodes" + (targetItem != null ? " and line to target item" : ""));
+    }
+
+    // Overload to maintain backward compatibility
+    public static void ShowPath(List<NodeScript> path)
+    {
+        ShowPath(path, null);
     }
 
     // Hide the path visualization
@@ -80,6 +115,8 @@ public static class NavigationPathVisualizer
             pathLineRenderer.enabled = false;
             Debug.Log("PathVisualizer: Path hidden");
         }
+        
+        currentTargetItem = null;
     }
 
     // Update the path color
@@ -121,5 +158,7 @@ public static class NavigationPathVisualizer
             pathLineObject = null;
             pathLineRenderer = null;
         }
+        
+        currentTargetItem = null;
     }
 }

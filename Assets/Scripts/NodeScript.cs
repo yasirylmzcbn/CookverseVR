@@ -205,7 +205,8 @@ public class NodeScript : MonoBehaviour
     }
 
     // Find path from player position to the closest item of a specific type
-    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType)
+    // Returns both the path and the target item
+    public static (List<NodeScript> path, GameObject targetItem) FindPathToClosestItemWithTarget(Vector3 playerPosition, ItemType targetItemType)
     {
         // Find all items of the target type
         ShelfItemData[] allItems = FindObjectsOfType<ShelfItemData>();
@@ -222,7 +223,7 @@ public class NodeScript : MonoBehaviour
         if (targetItems.Count == 0)
         {
             Debug.LogWarning($"NodeScript: No items of type {targetItemType} found in the scene!");
-            return new List<NodeScript>();
+            return (new List<NodeScript>(), null);
         }
 
         // Find closest target item to player
@@ -241,7 +242,7 @@ public class NodeScript : MonoBehaviour
 
         if (closestItem == null)
         {
-            return new List<NodeScript>();
+            return (new List<NodeScript>(), null);
         }
 
         // Find closest node to player and closest node to target item
@@ -251,13 +252,20 @@ public class NodeScript : MonoBehaviour
         if (startNode == null || endNode == null)
         {
             Debug.LogWarning("NodeScript: Could not find start or end node!");
-            return new List<NodeScript>();
+            return (new List<NodeScript>(), closestItem);
         }
 
         Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for item type {targetItemType}");
 
         // Find the shortest path
-        return FindShortestPath(startNode, endNode);
+        return (FindShortestPath(startNode, endNode), closestItem);
+    }
+
+    // Keep the old method for backward compatibility
+    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType)
+    {
+        var result = FindPathToClosestItemWithTarget(playerPosition, targetItemType);
+        return result.path;
     }
 
     #endregion
