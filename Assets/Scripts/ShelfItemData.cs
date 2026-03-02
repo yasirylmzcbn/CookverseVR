@@ -50,5 +50,6 @@ public enum ItemType
     Food_Steak,
     Food_Corn,
     Food_Oil,
-    Food_Milk
+    Food_Milk,
+    Food_Potato
 }
