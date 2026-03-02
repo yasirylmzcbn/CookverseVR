@@ -151,8 +151,8 @@ public class NodeScript : MonoBehaviour
         return closest;
     }
 
-    // Find shortest path between two nodes using Dijkstra's algorithm
-    public static List<NodeScript> FindShortestPath(NodeScript start, NodeScript end)
+    // Find shortest path between two nodes using BFS (unweighted graph)
+    public static List<NodeScript> FindShortestUnweightedPath(NodeScript start, NodeScript end)
     {
         if (start == null || end == null)
         {
@@ -165,58 +165,33 @@ public class NodeScript : MonoBehaviour
             return new List<NodeScript> { start };
         }
 
-        List<NodeScript> allNodes = FindAllNodes();
-        Dictionary<NodeScript, float> distances = new Dictionary<NodeScript, float>();
         Dictionary<NodeScript, NodeScript> previous = new Dictionary<NodeScript, NodeScript>();
-        List<NodeScript> unvisited = new List<NodeScript>(allNodes);
+        HashSet<NodeScript> visited = new HashSet<NodeScript>();
+        Queue<NodeScript> queue = new Queue<NodeScript>();
 
-        // Initialize distances
-        foreach (NodeScript node in allNodes)
+        visited.Add(start);
+        queue.Enqueue(start);
+
+        bool foundPath = false;
+
+        while (queue.Count > 0)
         {
-            distances[node] = float.MaxValue;
-        }
-        distances[start] = 0;
-
-        while (unvisited.Count > 0)
-        {
-            // Find unvisited node with smallest distance
-            NodeScript current = null;
-            float smallestDistance = float.MaxValue;
-            foreach (NodeScript node in unvisited)
-            {
-                if (distances[node] < smallestDistance)
-                {
-                    smallestDistance = distances[node];
-                    current = node;
-                }
-            }
-
-            if (current == null || distances[current] == float.MaxValue)
-            {
-                break; // No path exists
-            }
+            NodeScript current = queue.Dequeue();
 
             if (current == end)
             {
-                break; // Found the destination
+                foundPath = true;
+                break;
             }
 
-            unvisited.Remove(current);
-
-            // Check all neighbors
             foreach (NodeScript neighbor in current.GetConnectedNodes())
             {
-                if (neighbor == null || !unvisited.Contains(neighbor))
+                if (neighbor == null || visited.Contains(neighbor))
                     continue;
 
-                float distanceToNeighbor = Vector3.Distance(current.transform.position, neighbor.transform.position);
-                float altDistance = distances[current] + distanceToNeighbor;
-
-                if (altDistance < distances[neighbor])
-                {
-                    distances[neighbor] = altDistance;
-                    previous[neighbor] = current;
-                }
+                visited.Add(neighbor);
+                previous[neighbor] = current;
+                queue.Enqueue(neighbor);
             }
         }
 
@@ -224,7 +199,7 @@ public class NodeScript : MonoBehaviour
         List<NodeScript> path = new List<NodeScript>();
         NodeScript currentNode = end;
 
-        if (!previous.ContainsKey(currentNode) && currentNode != start)
+        if (!foundPath)
         {
             Debug.LogWarning($"NodeScript: No path found from {start.name} to {end.name}");
             return path;
@@ -240,6 +215,12 @@ public class NodeScript : MonoBehaviour
 
         path.Reverse();
         return path;
+    }
+
+    // Backward-compatible alias
+    public static List<NodeScript> FindShortestPath(NodeScript start, NodeScript end)
+    {
+        return FindShortestUnweightedPath(start, end);
     }
 
     // Find path from player position to the closest item of a specific type
@@ -301,7 +282,7 @@ public class NodeScript : MonoBehaviour
         Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for item type {targetItemType}");
 
         // Find the shortest path
-        return (FindShortestPath(startNode, endNode), closestItem);
+        return (FindShortestUnweightedPath(startNode, endNode), closestItem);
     }
 
     // Keep the old method for backward compatibility
@@ -333,7 +314,7 @@ public class NodeScript : MonoBehaviour
         Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for target item {targetItem.name}");
 
         // Find the shortest path
-        return FindShortestPath(startNode, endNode);
+        return FindShortestUnweightedPath(startNode, endNode);
     }
 
     #endregion
