@@ -8,8 +8,8 @@ public class TargetItemHighlighter : MonoBehaviour
     private static GameObject outlineObject;
 
     [Header("Highlight Settings")]
-    private static Color highlightColor = new Color(1f, 0.8f, 0f, 1f); // Gold/yellow color
-    private static float outlineWidth = 0.05f;
+    private static Color highlightColor = new Color(0f, 133f / 255f, 1f, 0.84f); // Same blue as nav path
+    private static float outlineWidth = 0.008f;
 
     // Highlight a specific game object
     public static void HighlightItem(GameObject targetItem)
@@ -30,7 +30,14 @@ public class TargetItemHighlighter : MonoBehaviour
     {
         if (outlineObject != null)
         {
-            Object.Destroy(outlineObject);
+            if (Application.isPlaying)
+            {
+                Object.Destroy(outlineObject);
+            }
+            else
+            {
+                Object.DestroyImmediate(outlineObject);
+            }
             outlineObject = null;
         }
 
@@ -40,13 +47,12 @@ public class TargetItemHighlighter : MonoBehaviour
     // Create an outline effect that's visible through walls
     private static void CreateOutlineEffect(GameObject target)
     {
-        // Get all mesh renderers from the target
-        MeshRenderer[] renderers = target.GetComponentsInChildren<MeshRenderer>();
-        MeshFilter[] filters = target.GetComponentsInChildren<MeshFilter>();
+        MeshFilter[] filters = target.GetComponentsInChildren<MeshFilter>(true);
+        SkinnedMeshRenderer[] skinnedRenderers = target.GetComponentsInChildren<SkinnedMeshRenderer>(true);
 
-        if (renderers.Length == 0 || filters.Length == 0)
+        if (filters.Length == 0 && skinnedRenderers.Length == 0)
         {
-            Debug.LogWarning("TargetItemHighlighter: No mesh found on target object");
+            Debug.LogWarning($"TargetItemHighlighter: No mesh found on target object {target.name}");
             return;
         }
 
@@ -60,36 +66,98 @@ public class TargetItemHighlighter : MonoBehaviour
         outlineObject = new GameObject("ItemOutline");
         outlineObject.transform.position = target.transform.position;
         outlineObject.transform.rotation = target.transform.rotation;
+        outlineObject.transform.localScale = Vector3.one;
         outlineObject.transform.SetParent(target.transform, true);
 
-        // Create outline for each mesh
+        int outlineIndex = 0;
+
+        // Create outlines for MeshFilter meshes
         for (int i = 0; i < filters.Length; i++)
         {
             if (filters[i].sharedMesh == null) continue;
+            if (IsGeneratedOutlineTransform(filters[i].transform)) continue;
+            MeshRenderer sourceRenderer = filters[i].GetComponent<MeshRenderer>();
+            if (sourceRenderer == null || !sourceRenderer.enabled) continue;
 
-            GameObject outlineMesh = new GameObject($"OutlineMesh_{i}");
-            outlineMesh.transform.SetParent(outlineObject.transform, false);
-            outlineMesh.transform.localPosition = filters[i].transform.localPosition;
-            outlineMesh.transform.localRotation = filters[i].transform.localRotation;
-            outlineMesh.transform.localScale = filters[i].transform.localScale * (1f + outlineWidth);
+            CreateOutlineMesh(filters[i].sharedMesh, filters[i].transform, outlineIndex++);
+        }
 
-            MeshFilter meshFilter = outlineMesh.AddComponent<MeshFilter>();
-            meshFilter.sharedMesh = filters[i].sharedMesh;
+        // Create outlines for SkinnedMeshRenderer meshes
+        for (int i = 0; i < skinnedRenderers.Length; i++)
+        {
+            if (skinnedRenderers[i].sharedMesh == null || !skinnedRenderers[i].enabled) continue;
+            if (IsGeneratedOutlineTransform(skinnedRenderers[i].transform)) continue;
+            CreateOutlineMesh(skinnedRenderers[i].sharedMesh, skinnedRenderers[i].transform, outlineIndex++);
+        }
 
-            MeshRenderer meshRenderer = outlineMesh.AddComponent<MeshRenderer>();
-            meshRenderer.material = outlineMaterial;
-            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            meshRenderer.receiveShadows = false;
+        if (outlineIndex == 0)
+        {
+            if (Application.isPlaying)
+            {
+                Object.Destroy(outlineObject);
+            }
+            else
+            {
+                Object.DestroyImmediate(outlineObject);
+            }
+            outlineObject = null;
+            Debug.LogWarning($"TargetItemHighlighter: Mesh components found but nothing eligible to outline on {target.name}");
+            return;
         }
 
         Debug.Log($"TargetItemHighlighter: Highlighted {target.name}");
     }
 
+    private static void CreateOutlineMesh(Mesh sourceMesh, Transform sourceTransform, int index)
+    {
+        GameObject outlineMesh = new GameObject($"OutlineMesh_{index}");
+        outlineMesh.transform.SetParent(outlineObject.transform, true);
+
+        // Use world transform so nested hierarchies align correctly
+        outlineMesh.transform.position = sourceTransform.position;
+        outlineMesh.transform.rotation = sourceTransform.rotation;
+
+        Vector3 parentLossyScale = outlineObject.transform.lossyScale;
+        Vector3 sourceLossyScale = sourceTransform.lossyScale;
+        Vector3 relativeScale = new Vector3(
+            parentLossyScale.x != 0f ? sourceLossyScale.x / parentLossyScale.x : sourceLossyScale.x,
+            parentLossyScale.y != 0f ? sourceLossyScale.y / parentLossyScale.y : sourceLossyScale.y,
+            parentLossyScale.z != 0f ? sourceLossyScale.z / parentLossyScale.z : sourceLossyScale.z
+        );
+        outlineMesh.transform.localScale = relativeScale * (1f + outlineWidth);
+
+        MeshFilter meshFilter = outlineMesh.AddComponent<MeshFilter>();
+        meshFilter.sharedMesh = sourceMesh;
+
+        MeshRenderer meshRenderer = outlineMesh.AddComponent<MeshRenderer>();
+        meshRenderer.material = outlineMaterial;
+        meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        meshRenderer.receiveShadows = false;
+    }
+
+    private static bool IsGeneratedOutlineTransform(Transform transform)
+    {
+        Transform current = transform;
+        while (current != null)
+        {
+            if (current.name == "ItemOutline" || current.name.StartsWith("OutlineMesh_"))
+            {
+                return true;
+            }
+            current = current.parent;
+        }
+        return false;
+    }
+
     // Create a material that renders through walls (like spectral arrow effect)
     private static void CreateOutlineMaterial()
     {
-        // Use a shader that ignores depth (renders through walls)
-        Shader outlineShader = Shader.Find("Unlit/Color");
+        // Use a shader that supports depth overrides for through-wall rendering
+        Shader outlineShader = Shader.Find("Hidden/Internal-Colored");
+        if (outlineShader == null)
+        {
+            outlineShader = Shader.Find("Unlit/Color");
+        }
         if (outlineShader == null)
         {
             outlineShader = Shader.Find("Sprites/Default");
@@ -98,12 +166,16 @@ public class TargetItemHighlighter : MonoBehaviour
         outlineMaterial = new Material(outlineShader);
         outlineMaterial.color = highlightColor;
 
-        // Set render queue to overlay so it renders on top of everything
-        outlineMaterial.renderQueue = 3000; // Transparent queue
+        // Render as overlay so it is visible through walls
+        outlineMaterial.renderQueue = 4000;
         
         // Enable transparency
-        outlineMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always); // Always render, ignore depth
-        outlineMaterial.SetInt("_ZWrite", 0); // Don't write to depth buffer
+        outlineMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        outlineMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        outlineMaterial.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
+        outlineMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
+        outlineMaterial.SetInt("_ZWrite", 0);
+        outlineMaterial.EnableKeyword("_ALPHABLEND_ON");
     }
 
     // Update highlight color
