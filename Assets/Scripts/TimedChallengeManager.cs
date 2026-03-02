@@ -7,8 +7,8 @@ public class TimedChallengeManager : MonoBehaviour
     public static TimedChallengeManager Instance;
 
     [Header("Challenge Settings")]
-    public float challengeDuration = 60f;
-    public int roundsRequired = 3;
+    public float challengeDuration = 120f;
+    public int roundsRequired = 10;
 
     [Header("References")]
     public ShelfItemsManager shelfManager;
