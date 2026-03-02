@@ -22,11 +22,19 @@ public class TimedChallengeManager : MonoBehaviour
     [Tooltip("Enable path visualization during the challenge")]
     public bool showPathToTarget = true;
 
+    [Tooltip("How often to update the path (in seconds)")]
+    public float pathUpdateInterval = 0.5f;
+
+    [Tooltip("Minimum distance player must move before updating path")]
+    public float pathUpdateDistanceThreshold = 1f;
+
     private float timer;
     private bool challengeActive;
     private int roundsWon;
-
     private ItemType currentTarget;
+    
+    private float lastPathUpdateTime;
+    private Vector3 lastPlayerPosition;
 
     private void Awake()
     {
@@ -52,6 +60,29 @@ public class TimedChallengeManager : MonoBehaviour
         if (timer <= 0f)
         {
             ChallengeFailed();
+        }
+
+        // Update path dynamically as player moves
+        if (showPathToTarget)
+        {
+            UpdatePathIfNeeded();
+        }
+    }
+
+    // Check if we should update the path based on time and distance thresholds
+    private void UpdatePathIfNeeded()
+    {
+        if (playerTransform == null) return;
+
+        float timeSinceLastUpdate = Time.time - lastPathUpdateTime;
+        float distanceMoved = Vector3.Distance(playerTransform.position, lastPlayerPosition);
+
+        // Update path if enough time has passed OR player moved significantly
+        if (timeSinceLastUpdate >= pathUpdateInterval || distanceMoved >= pathUpdateDistanceThreshold)
+        {
+            ShowPathToTarget();
+            lastPathUpdateTime = Time.time;
+            lastPlayerPosition = playerTransform.position;
         }
     }
 
@@ -88,7 +119,14 @@ public class TimedChallengeManager : MonoBehaviour
             "Round " + (roundsWon + 1) + "/" + roundsRequired +
             "\nFind: " + FormatEnumName(currentTarget.ToString());
 
-        // Show path to the target item
+        // Reset path update tracking
+        lastPathUpdateTime = 0f;
+        if (playerTransform != null)
+        {
+            lastPlayerPosition = playerTransform.position;
+        }
+
+        // Show initial path to the target item
         if (showPathToTarget)
         {
             ShowPathToTarget();
@@ -103,7 +141,7 @@ public class TimedChallengeManager : MonoBehaviour
             return;
         }
 
-        // Use NodeScript to find the path and NavigationPathVisualizer to show it
+        // Use NodeScript to find the path from current player position
         List<NodeScript> path = NodeScript.FindPathToClosestItem(playerTransform.position, currentTarget);
         NavigationPathVisualizer.ShowPath(path);
     }
