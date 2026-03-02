@@ -4,7 +4,9 @@ using System.Collections.Generic;
 // Handles visualization of navigation paths
 public static class NavigationPathVisualizer
 {
-    private static Color pathColor = new Color(0f, 1f, 0f, 0.8f);
+    // Battery blue shade as fallback color - RGB(0, 133, 255) with alpha 0.84
+    private static Color batteryBlueColor = new Color(0f, 133f / 255f, 1f, 0.84f);
+    private static Color pathColor = new Color(0f, 133f / 255f, 1f, 0.84f);
     private static float pathLineWidth = 0.02f; // Much thinner line
 
     private static LineRenderer pathLineRenderer;
@@ -31,20 +33,22 @@ public static class NavigationPathVisualizer
         
         if (navMaterial != null)
         {
-            pathLineRenderer.material = navMaterial;
+            pathLineRenderer.material = new Material(navMaterial);
+            pathColor = navMaterial.color;
             Debug.Log("PathVisualizer: Using NavMaterial");
         }
         else
         {
-            // Fallback: Create a simple material if NavMaterial not found
-            Debug.LogWarning("PathVisualizer: NavMaterial not found at Resources/Materials/NavMaterial, using fallback material");
+            // Fallback: Create a simple material with battery blue if NavMaterial not found
+            Debug.LogWarning("PathVisualizer: NavMaterial not found at Resources/Materials/NavMaterial, using battery blue fallback");
             Shader shader = Shader.Find("Unlit/Color");
             if (shader == null)
                 shader = Shader.Find("Sprites/Default");
 
             Material lineMaterial = new Material(shader);
-            lineMaterial.color = pathColor;
+            lineMaterial.color = batteryBlueColor;
             pathLineRenderer.material = lineMaterial;
+            pathColor = batteryBlueColor;
         }
 
         // Set gradient

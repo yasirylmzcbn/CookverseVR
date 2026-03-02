@@ -220,6 +220,8 @@ public class NodeScript : MonoBehaviour
             }
         }
 
+        Debug.Log($"NodeScript: FindPathToClosestItemWithTarget - Looking for {targetItemType}, found {targetItems.Count} items of that type out of {allItems.Length} total items");
+
         if (targetItems.Count == 0)
         {
             Debug.LogWarning($"NodeScript: No items of type {targetItemType} found in the scene!");
@@ -245,6 +247,9 @@ public class NodeScript : MonoBehaviour
             return (new List<NodeScript>(), null);
         }
 
+        ShelfItemData closestData = closestItem.GetComponent<ShelfItemData>();
+        Debug.Log($"NodeScript: Closest {targetItemType} item is {closestData?.itemType} at {closestItem.name} (distance: {closestItemDistance})");
+
         // Find closest node to player and closest node to target item
         NodeScript startNode = GetClosestNodeToPosition(playerPosition);
         NodeScript endNode = GetClosestNodeToPosition(closestItem.transform.position);
@@ -266,6 +271,31 @@ public class NodeScript : MonoBehaviour
     {
         var result = FindPathToClosestItemWithTarget(playerPosition, targetItemType);
         return result.path;
+    }
+
+    // Find path to a specific item (used when a target item is already cached)
+    public static List<NodeScript> FindPathToSpecificItem(Vector3 playerPosition, GameObject targetItem)
+    {
+        if (targetItem == null)
+        {
+            Debug.LogWarning("NodeScript: Target item is null!");
+            return new List<NodeScript>();
+        }
+
+        // Find closest node to player and closest node to target item
+        NodeScript startNode = GetClosestNodeToPosition(playerPosition);
+        NodeScript endNode = GetClosestNodeToPosition(targetItem.transform.position);
+
+        if (startNode == null || endNode == null)
+        {
+            Debug.LogWarning("NodeScript: Could not find start or end node for path to specific item!");
+            return new List<NodeScript>();
+        }
+
+        Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for target item {targetItem.name}");
+
+        // Find the shortest path
+        return FindShortestPath(startNode, endNode);
     }
 
     #endregion

@@ -36,6 +36,7 @@ public class TimedChallengeManager : MonoBehaviour
     private bool challengeActive;
     private int roundsWon;
     private ItemType currentTarget;
+    private GameObject cachedTargetItem; // Cache the target item to prevent switching targets as player moves
     
     private float lastPathUpdateTime;
     private Vector3 lastPlayerPosition;
@@ -131,6 +132,9 @@ public class TimedChallengeManager : MonoBehaviour
             "Round " + (roundsWon + 1) + "/" + roundsRequired +
             "\nFind: " + FormatEnumName(currentTarget.ToString());
 
+        // Reset cached target item so it will be recalculated on next path update
+        cachedTargetItem = null;
+        
         // Reset path update tracking
         lastPathUpdateTime = 0f;
         if (playerTransform != null)
@@ -153,25 +157,46 @@ public class TimedChallengeManager : MonoBehaviour
             return;
         }
 
-        // Use NodeScript to find the path and target item from current player position
-        var result = NodeScript.FindPathToClosestItemWithTarget(playerTransform.position, currentTarget);
-        List<NodeScript> path = result.path;
-        GameObject targetItem = result.targetItem;
+        // If we don't have a cached target item yet, find the closest one
+        if (cachedTargetItem == null)
+        {
+            var result = NodeScript.FindPathToClosestItemWithTarget(playerTransform.position, currentTarget);
+            cachedTargetItem = result.targetItem;
+            
+            if (cachedTargetItem != null)
+            {
+                ShelfItemData targetData = cachedTargetItem.GetComponent<ShelfItemData>();
+                Debug.Log($"TimedChallengeManager: Target item cached - Looking for {currentTarget}, found {targetData?.itemType} at {cachedTargetItem.name}");
+            }
+            else
+            {
+                Debug.LogWarning($"TimedChallengeManager: No item found for target type {currentTarget}!");
+            }
+        }
+
+        // Use cached target item for consistent path throughout the round
+        List<NodeScript> path = NodeScript.FindPathToSpecificItem(playerTransform.position, cachedTargetItem);
 
         // Show the path with line to target item
-        NavigationPathVisualizer.ShowPath(path, targetItem);
+        NavigationPathVisualizer.ShowPath(path, cachedTargetItem);
 
         // Highlight the target item
-        if (targetItem != null)
+        if (cachedTargetItem != null)
         {
-            TargetItemHighlighter.HighlightItem(targetItem);
+            TargetItemHighlighter.HighlightItem(cachedTargetItem);
         }
     }
 
     // If the item picked up is the correct item, then you win a round
     public void ItemCollected(ItemType collectedItem)
     {
-        if (!challengeActive) return;
+        if (!challengeActive)
+        {
+            Debug.Log($"TimedChallengeManager: Item collected ({collectedItem}) but challenge is not active");
+            return;
+        }
+
+        Debug.Log($"TimedChallengeManager: Item collected - Expected {currentTarget}, got {collectedItem}. Match: {collectedItem == currentTarget}");
 
         if (collectedItem == currentTarget)
         {

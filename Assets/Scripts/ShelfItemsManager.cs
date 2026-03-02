@@ -61,6 +61,9 @@ public class ShelfItemsManager : MonoBehaviour
             return;
         }
 
+        // Log available prefabs and their item types
+        LogAvailablePrefabs();
+
         // Only auto-replace on start if NOT using ingredient distribution
         // (IngredientDistributionManager will call RefreshItems after setting up the mapping)
         if (!oneIngredientPerShelf)
@@ -71,6 +74,50 @@ public class ShelfItemsManager : MonoBehaviour
         else
         {
             Debug.Log("ShelfItemsManager: Waiting for IngredientDistributionManager to set mapping");
+        }
+    }
+
+    private void LogAvailablePrefabs()
+    {
+        Debug.Log($"ShelfItemsManager: Available prefabs ({shelfItemPrefabs.Count} total):");
+        Dictionary<ItemType, int> prefabsByType = new Dictionary<ItemType, int>();
+        
+        foreach (var prefab in shelfItemPrefabs)
+        {
+            ShelfItemData itemData = prefab.GetComponent<ShelfItemData>();
+            if (itemData != null)
+            {
+                Debug.Log($"  - {prefab.name}: {itemData.itemType}");
+                if (!prefabsByType.ContainsKey(itemData.itemType))
+                    prefabsByType[itemData.itemType] = 0;
+                prefabsByType[itemData.itemType]++;
+            }
+            else
+            {
+                Debug.LogWarning($"  - {prefab.name}: NO ShelfItemData COMPONENT!");
+            }
+        }
+        
+        // Show summary
+        Debug.Log("Prefabs by ItemType:");
+        foreach (var kvp in prefabsByType)
+        {
+            Debug.Log($"  {kvp.Key}: {kvp.Value} prefab(s)");
+        }
+        
+        // Check for missing ItemTypes
+        ItemType[] allItemTypes = System.Enum.GetValues(typeof(ItemType)) as ItemType[];
+        Debug.Log($"ItemTypes in enum ({allItemTypes.Length} total):");
+        foreach (var itemType in allItemTypes)
+        {
+            if (!prefabsByType.ContainsKey(itemType))
+            {
+                Debug.LogWarning($"  MISSING: {itemType} - No prefab assigned!");
+            }
+            else
+            {
+                Debug.Log($"  OK: {itemType}");
+            }
         }
     }
 
@@ -116,6 +163,20 @@ public class ShelfItemsManager : MonoBehaviour
     {
         shelfToIngredientMap = ingredientMap;
         Debug.Log($"ShelfItemsManager: Set ingredient mapping for {ingredientMap.Count} shelves");
+        
+        // Log the ingredient distribution by type
+        Dictionary<ItemType, int> typeCount = new Dictionary<ItemType, int>();
+        foreach (var itemType in ingredientMap.Values)
+        {
+            if (!typeCount.ContainsKey(itemType))
+                typeCount[itemType] = 0;
+            typeCount[itemType]++;
+        }
+        
+        foreach (var kvp in typeCount)
+        {
+            Debug.Log($"  - {kvp.Key}: {kvp.Value} shelves");
+        }
     }
 
     #endregion
@@ -127,6 +188,7 @@ public class ShelfItemsManager : MonoBehaviour
         List<Transform> propsToReplace = FindInnerMostProps(transform);
 
         Debug.Log($"Found {propsToReplace.Count} props to replace on {gameObject.name}");
+        Debug.Log($"oneIngredientPerShelf: {oneIngredientPerShelf}, ingredientMap count: {shelfToIngredientMap.Count}");
 
         foreach (Transform prop in propsToReplace)
         {
@@ -134,11 +196,32 @@ public class ShelfItemsManager : MonoBehaviour
         }
 
         Debug.Log($"Successfully replaced {spawnedItems.Count} shelf items on {gameObject.name}");
+        DumpItemTypeDistribution();
+    }
+
+    private void DumpItemTypeDistribution()
+    {
+        ShelfItemData[] allItems = FindObjectsOfType<ShelfItemData>();
+        Dictionary<ItemType, int> distribution = new Dictionary<ItemType, int>();
+        
+        foreach (ShelfItemData item in allItems)
+        {
+            if (!distribution.ContainsKey(item.itemType))
+                distribution[item.itemType] = 0;
+            distribution[item.itemType]++;
+        }
+        
+        Debug.Log($"ShelfItemsManager: Item type distribution in scene ({allItems.Length} total items):");
+        foreach (var kvp in distribution)
+        {
+            Debug.Log($"  {kvp.Key}: {kvp.Value} items");
+        }
     }
 
     private void SpawnRandomItem(Transform prop)
     {
         GameObject prefabToSpawn;
+        ItemType spawnedItemType = ItemType.Food_Apple; // Default
 
         if (oneIngredientPerShelf && shelfToIngredientMap.Count > 0)
         {
@@ -149,11 +232,12 @@ public class ShelfItemsManager : MonoBehaviour
             {
                 // Get the assigned ingredient type for this shelf
                 ItemType ingredientType = shelfToIngredientMap[parentShelf];
+                spawnedItemType = ingredientType;
                 prefabToSpawn = GetPrefabByIngredientType(ingredientType);
                 
                 if (prefabToSpawn == null)
                 {
-                    Debug.LogWarning($"No prefab found for ingredient type {ingredientType} on shelf {parentShelf.name}, using random prefab");
+                    Debug.LogWarning($"ShelfItemsManager: No prefab found for ingredient type {ingredientType} on shelf {parentShelf.name}, using random prefab as fallback");
                     prefabToSpawn = shelfItemPrefabs[Random.Range(0, shelfItemPrefabs.Count)];
                 }
                 else
@@ -173,18 +257,54 @@ public class ShelfItemsManager : MonoBehaviour
                     Debug.LogError($"ShelfItemsManager: Shelf {parentShelf.name} not in ingredient map! Using random ingredient.");
                 }
                 prefabToSpawn = shelfItemPrefabs[Random.Range(0, shelfItemPrefabs.Count)];
+                
+                // Try to get ItemType from the random prefab
+                ShelfItemData prefabData = prefabToSpawn.GetComponent<ShelfItemData>();
+                if (prefabData != null)
+                {
+                    spawnedItemType = prefabData.itemType;
+                }
             }
         }
         else
         {
             // Random selection (original behavior)
-            prefabToSpawn = shelfItemPrefabs[Random.Range(0, shelfItemPrefabs.Count)];
+            int randomIndex = Random.Range(0, shelfItemPrefabs.Count);
+            prefabToSpawn = shelfItemPrefabs[randomIndex];
+            
+            // Get the ItemType from the prefab's ShelfItemData if available
+            ShelfItemData prefabData = prefabToSpawn.GetComponent<ShelfItemData>();
+            if (prefabData != null)
+            {
+                spawnedItemType = prefabData.itemType;
+                Debug.Log($"ShelfItemsManager: Selected random prefab index {randomIndex} with type {spawnedItemType}");
+            }
+            else
+            {
+                Debug.LogWarning($"ShelfItemsManager: Selected random prefab {prefabToSpawn.name} has no ShelfItemData! Using default type.");
+            }
         }
 
         Vector3 spawnPosition = prop.position + new Vector3(0f, yOffset, 0f);
         Quaternion spawnRotation = prop.rotation;
 
         GameObject newItem = Instantiate(prefabToSpawn, spawnPosition, spawnRotation);
+
+        // Ensure the spawned item has the correct ItemType set
+        ShelfItemData itemData = newItem.GetComponent<ShelfItemData>();
+        if (itemData != null)
+        {
+            itemData.itemType = spawnedItemType;
+            
+            // Rename the item to match its ItemType for clarity and consistency
+            newItem.name = spawnedItemType.ToString();
+            
+            Debug.Log($"ShelfItemsManager: Item spawned with type {spawnedItemType} at {newItem.name}");
+        }
+        else
+        {
+            Debug.LogWarning($"ShelfItemsManager: Spawned item {newItem.name} has no ShelfItemData component!");
+        }
 
         if (parentToShelf)
         {
@@ -229,6 +349,11 @@ public class ShelfItemsManager : MonoBehaviour
             {
                 matchingPrefabs.Add(prefab);
             }
+        }
+
+        if (matchingPrefabs.Count == 0)
+        {
+            Debug.LogWarning($"ShelfItemsManager: No prefab found for ingredient type {targetType}! This needs to be assigned in the Inspector.");
         }
 
         // Return a random matching prefab, or null if none found
@@ -302,12 +427,21 @@ public class ShelfItemsManager : MonoBehaviour
         {
             grabInteractable.selectEntered.AddListener((args) =>
             {
+                Debug.Log($"ShelfItemsManager: Item grabbed - Type: {data.itemType}, Item: {item.name}");
                 if (TimedChallengeManager.Instance != null)
                 {
                     TimedChallengeManager.Instance
                         .ItemCollected(data.itemType);
                 }
+                else
+                {
+                    Debug.LogWarning("ShelfItemsManager: TimedChallengeManager.Instance is null!");
+                }
             });
+        }
+        else
+        {
+            Debug.LogWarning($"ShelfItemsManager: Item {item.name} has no ShelfItemData component!");
         }
     }
 
