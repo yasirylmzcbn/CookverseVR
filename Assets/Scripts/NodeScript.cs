@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
+// Navigation node for pathfinding
 public class NodeScript : MonoBehaviour
 {
     [Header("Node Connections")]
@@ -73,4 +75,190 @@ public class NodeScript : MonoBehaviour
     {
         return connectedNodes;
     }
+
+    #region Static Pathfinding Methods
+
+    // Find all nodes in the scene
+    public static List<NodeScript> FindAllNodes()
+    {
+        return FindObjectsOfType<NodeScript>().ToList();
+    }
+
+    // Get the closest node to a specific position
+    public static NodeScript GetClosestNodeToPosition(Vector3 position)
+    {
+        List<NodeScript> allNodes = FindAllNodes();
+        
+        if (allNodes.Count == 0)
+        {
+            Debug.LogWarning("NodeScript: No nodes found in the scene!");
+            return null;
+        }
+
+        NodeScript closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (NodeScript node in allNodes)
+        {
+            if (node == null) continue;
+
+            float distance = Vector3.Distance(position, node.transform.position);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = node;
+            }
+        }
+
+        return closest;
+    }
+
+    // Find shortest path between two nodes using Dijkstra's algorithm
+    public static List<NodeScript> FindShortestPath(NodeScript start, NodeScript end)
+    {
+        if (start == null || end == null)
+        {
+            Debug.LogWarning("NodeScript: Start or end node is null!");
+            return new List<NodeScript>();
+        }
+
+        if (start == end)
+        {
+            return new List<NodeScript> { start };
+        }
+
+        List<NodeScript> allNodes = FindAllNodes();
+        Dictionary<NodeScript, float> distances = new Dictionary<NodeScript, float>();
+        Dictionary<NodeScript, NodeScript> previous = new Dictionary<NodeScript, NodeScript>();
+        List<NodeScript> unvisited = new List<NodeScript>(allNodes);
+
+        // Initialize distances
+        foreach (NodeScript node in allNodes)
+        {
+            distances[node] = float.MaxValue;
+        }
+        distances[start] = 0;
+
+        while (unvisited.Count > 0)
+        {
+            // Find unvisited node with smallest distance
+            NodeScript current = null;
+            float smallestDistance = float.MaxValue;
+            foreach (NodeScript node in unvisited)
+            {
+                if (distances[node] < smallestDistance)
+                {
+                    smallestDistance = distances[node];
+                    current = node;
+                }
+            }
+
+            if (current == null || distances[current] == float.MaxValue)
+            {
+                break; // No path exists
+            }
+
+            if (current == end)
+            {
+                break; // Found the destination
+            }
+
+            unvisited.Remove(current);
+
+            // Check all neighbors
+            foreach (NodeScript neighbor in current.GetConnectedNodes())
+            {
+                if (neighbor == null || !unvisited.Contains(neighbor))
+                    continue;
+
+                float distanceToNeighbor = Vector3.Distance(current.transform.position, neighbor.transform.position);
+                float altDistance = distances[current] + distanceToNeighbor;
+
+                if (altDistance < distances[neighbor])
+                {
+                    distances[neighbor] = altDistance;
+                    previous[neighbor] = current;
+                }
+            }
+        }
+
+        // Reconstruct path
+        List<NodeScript> path = new List<NodeScript>();
+        NodeScript currentNode = end;
+
+        if (!previous.ContainsKey(currentNode) && currentNode != start)
+        {
+            Debug.LogWarning($"NodeScript: No path found from {start.name} to {end.name}");
+            return path;
+        }
+
+        while (currentNode != null)
+        {
+            path.Add(currentNode);
+            if (currentNode == start)
+                break;
+            previous.TryGetValue(currentNode, out currentNode);
+        }
+
+        path.Reverse();
+        return path;
+    }
+
+    // Find path from player position to the closest item of a specific type
+    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType)
+    {
+        // Find all items of the target type
+        ShelfItemData[] allItems = FindObjectsOfType<ShelfItemData>();
+        List<GameObject> targetItems = new List<GameObject>();
+
+        foreach (ShelfItemData item in allItems)
+        {
+            if (item.itemType == targetItemType)
+            {
+                targetItems.Add(item.gameObject);
+            }
+        }
+
+        if (targetItems.Count == 0)
+        {
+            Debug.LogWarning($"NodeScript: No items of type {targetItemType} found in the scene!");
+            return new List<NodeScript>();
+        }
+
+        // Find closest target item to player
+        GameObject closestItem = null;
+        float closestItemDistance = float.MaxValue;
+
+        foreach (GameObject item in targetItems)
+        {
+            float distance = Vector3.Distance(playerPosition, item.transform.position);
+            if (distance < closestItemDistance)
+            {
+                closestItemDistance = distance;
+                closestItem = item;
+            }
+        }
+
+        if (closestItem == null)
+        {
+            return new List<NodeScript>();
+        }
+
+        // Find closest node to player and closest node to target item
+        NodeScript startNode = GetClosestNodeToPosition(playerPosition);
+        NodeScript endNode = GetClosestNodeToPosition(closestItem.transform.position);
+
+        if (startNode == null || endNode == null)
+        {
+            Debug.LogWarning("NodeScript: Could not find start or end node!");
+            return new List<NodeScript>();
+        }
+
+        Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for item type {targetItemType}");
+
+        // Find the shortest path
+        return FindShortestPath(startNode, endNode);
+    }
+
+    #endregion
 }

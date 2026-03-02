@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
 public class TimedChallengeManager : MonoBehaviour
 {
@@ -14,6 +15,13 @@ public class TimedChallengeManager : MonoBehaviour
     public TextMeshProUGUI timerText;
     public TextMeshProUGUI targetText;
 
+    [Header("Pathfinding Settings")]
+    [Tooltip("Transform to use as player position (e.g., XR Origin or Main Camera)")]
+    public Transform playerTransform;
+    
+    [Tooltip("Enable path visualization during the challenge")]
+    public bool showPathToTarget = true;
+
     private float timer;
     private bool challengeActive;
     private int roundsWon;
@@ -23,6 +31,13 @@ public class TimedChallengeManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        
+        // Try to find player transform if not assigned
+        if (playerTransform == null && Camera.main != null)
+        {
+            playerTransform = Camera.main.transform;
+            Debug.Log("TimedChallengeManager: Using Main Camera as player transform");
+        }
     }
 
     // Updates the timer value
@@ -72,6 +87,25 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text =
             "Round " + (roundsWon + 1) + "/" + roundsRequired +
             "\nFind: " + FormatEnumName(currentTarget.ToString());
+
+        // Show path to the target item
+        if (showPathToTarget)
+        {
+            ShowPathToTarget();
+        }
+    }
+
+    private void ShowPathToTarget()
+    {
+        if (playerTransform == null)
+        {
+            Debug.LogWarning("TimedChallengeManager: Player transform not assigned!");
+            return;
+        }
+
+        // Use NodeScript to find the path and NavigationPathVisualizer to show it
+        List<NodeScript> path = NodeScript.FindPathToClosestItem(playerTransform.position, currentTarget);
+        NavigationPathVisualizer.ShowPath(path);
     }
 
     // If the item picked up is the correct item, then you win a round
@@ -102,6 +136,9 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
 
+        // Hide path
+        NavigationPathVisualizer.HidePath();
+
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
     }
@@ -112,6 +149,9 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = false;
         targetText.text = "Failed!";
         Debug.Log("FAILED");
+
+        // Hide path
+        NavigationPathVisualizer.HidePath();
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
