@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6016360805563504990}
   - component: {fileID: 8402202942561774996}
   - component: {fileID: 6287802495518823136}
+  - component: {fileID: 1256040104682652641}
   m_Layer: 0
   m_Name: Food_Potato
   m_TagString: Pickup
@@ -113,3 +114,17 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 1288434454737850331, guid: 244c889c6cd9c3f438f680ee17cc566b, type: 3}
+--- !u!114 &1256040104682652641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8041849481946025025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10bf6d15a9609ea48b28e6b26fce8d4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShelfItemData
+  itemType: 15
+  displayName: 
