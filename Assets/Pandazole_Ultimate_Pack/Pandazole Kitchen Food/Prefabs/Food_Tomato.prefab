@@ -126,5 +126,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10bf6d15a9609ea48b28e6b26fce8d4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShelfItemData
-  itemType: 0
+  itemType: 2
   displayName: 
