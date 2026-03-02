@@ -100,6 +100,9 @@ public class TimedChallengeManager : MonoBehaviour
         timer = challengeDuration;
         roundsWon = 0;
 
+        // Show navigation nodes
+        NodeScript.SetAllNodesVisible(true);
+
         // Make UI visible
         if (timerText != null)
             timerText.gameObject.SetActive(true);
@@ -215,8 +218,9 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
 
-        // Hide path
+        // Hide path and nodes
         NavigationPathVisualizer.HidePath();
+        NodeScript.SetAllNodesVisible(false);
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
@@ -229,8 +233,9 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Failed!";
         Debug.Log("FAILED");
 
-        // Hide path
+        // Hide path and nodes
         NavigationPathVisualizer.HidePath();
+        NodeScript.SetAllNodesVisible(false);
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
