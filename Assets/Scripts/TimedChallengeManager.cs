@@ -179,12 +179,6 @@ public class TimedChallengeManager : MonoBehaviour
 
         // Show the path with line to target item
         NavigationPathVisualizer.ShowPath(path, cachedTargetItem);
-
-        // Highlight the target item
-        if (cachedTargetItem != null)
-        {
-            TargetItemHighlighter.HighlightItem(cachedTargetItem);
-        }
     }
 
     // If the item picked up is the correct item, then you win a round
@@ -221,9 +215,8 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
 
-        // Hide path and clear highlight
+        // Hide path
         NavigationPathVisualizer.HidePath();
-        TargetItemHighlighter.ClearHighlight();
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
@@ -236,9 +229,8 @@ public class TimedChallengeManager : MonoBehaviour
         targetText.text = "Failed!";
         Debug.Log("FAILED");
 
-        // Hide path and clear highlight
+        // Hide path
         NavigationPathVisualizer.HidePath();
-        TargetItemHighlighter.ClearHighlight();
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);

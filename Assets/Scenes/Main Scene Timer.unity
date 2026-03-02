@@ -160,6 +160,10 @@ PrefabInstance:
       value: -5.34
       objectReference: {fileID: 0}
     - target: {fileID: 6153791730072046484, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      propertyPath: m_Name
+      value: CookwareShelves
+      objectReference: {fileID: 0}
+    - target: {fileID: 6153791730072046484, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
@@ -233,6 +237,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1115729993}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6153791730072046484, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1046282507}
     - targetCorrespondingSourceObject: {fileID: 5065034025367727628, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5618447}
@@ -18091,6 +18098,30 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2467845069284678478, guid: 3c0b460c20e5c954d8523df4157882d1, type: 3}
   m_PrefabInstance: {fileID: 1043735013}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1046282505 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6153791730072046484, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
+  m_PrefabInstance: {fileID: 5618444}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1046282507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1046282505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5137a54442079c942b38bbaa8c7b6f5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  useTagFiltering: 0
+  propTag: ShelfProp
+  interactionLayers:
+    m_Bits: 1
+  movementType: 2
+  enableThrowing: 1
+  autoSetupOnStart: 1
 --- !u!1001 &1047088882
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19592,6 +19623,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::IngredientDistributionManager
   shelfManager: {fileID: 5618447}
   rowsParent: {fileID: 5618448}
+  organizedMode: 1
   autoFindComponents: 1
 --- !u!1001 &1121352877
 PrefabInstance:
