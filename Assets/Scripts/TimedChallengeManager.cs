@@ -11,10 +11,10 @@ public class TimedChallengeManager : MonoBehaviour
     public int roundsRequired = 10;
 
     [Header("References")]
-    public ShelfItemsManager shelfManager;
-    public TextMeshProUGUI timerText;
-    public TextMeshProUGUI targetText;
-    
+    [SerializeField] public ShelfItemsManager shelfManager;
+    [SerializeField] public TextMeshProUGUI timerText;
+    [SerializeField] public TextMeshProUGUI targetText;
+
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
     public IngredientDistributionManager ingredientDistribution;
@@ -22,7 +22,7 @@ public class TimedChallengeManager : MonoBehaviour
     [Header("Pathfinding Settings")]
     [Tooltip("Transform to use as player position (e.g., XR Origin or Main Camera)")]
     public Transform playerTransform;
-    
+
     [Tooltip("Enable path visualization during the challenge")]
     public bool showPathToTarget = true;
 
@@ -37,14 +37,14 @@ public class TimedChallengeManager : MonoBehaviour
     private int roundsWon;
     private ItemType currentTarget;
     private GameObject cachedTargetItem; // Cache the target item to prevent switching targets as player moves
-    
+
     private float lastPathUpdateTime;
     private Vector3 lastPlayerPosition;
 
     private void Awake()
     {
         Instance = this;
-        
+
         // Try to find player transform if not assigned
         if (playerTransform == null && Camera.main != null)
         {
@@ -104,6 +104,7 @@ public class TimedChallengeManager : MonoBehaviour
         NodeScript.SetAllNodesVisible(true);
 
         // Make UI visible
+        Debug.Log("yasir123 making timer and target text visible");
         if (timerText != null)
             timerText.gameObject.SetActive(true);
         if (targetText != null)
@@ -137,7 +138,7 @@ public class TimedChallengeManager : MonoBehaviour
 
         // Reset cached target item so it will be recalculated on next path update
         cachedTargetItem = null;
-        
+
         // Reset path update tracking
         lastPathUpdateTime = 0f;
         if (playerTransform != null)
@@ -165,7 +166,7 @@ public class TimedChallengeManager : MonoBehaviour
         {
             var result = NodeScript.FindPathToClosestItemWithTarget(playerTransform.position, currentTarget);
             cachedTargetItem = result.targetItem;
-            
+
             if (cachedTargetItem != null)
             {
                 ShelfItemData targetData = cachedTargetItem.GetComponent<ShelfItemData>();
