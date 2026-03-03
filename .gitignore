@@ -12,6 +12,15 @@
 /[Uu]ser[Ss]ettings/
 *.log
 
+launch.json
+/.vscode
+launch.json
+settings.json
+
+
+*IL2CPP*
+cookversevr_BackUpThisFolder_ButDontShipItWithYourGame/*
+
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1
 *.blend1.meta
