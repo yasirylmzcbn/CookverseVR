@@ -20,7 +20,7 @@ settings.json
 .DS_Store
 
 Assets/_Recovery
-
+*DontShip*
 *DoNotShip*
 
 *IL2CPP*
