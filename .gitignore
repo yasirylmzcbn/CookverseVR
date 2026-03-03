@@ -13,10 +13,13 @@
 *.log
 
 launch.json
-/.vscode
+.vscode/*
 launch.json
 settings.json
 
+Assets/_Recovery
+
+*DoNotShip*
 
 *IL2CPP*
 cookversevr_BackUpThisFolder_ButDontShipItWithYourGame/*
