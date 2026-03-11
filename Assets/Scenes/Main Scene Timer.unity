@@ -18343,14 +18343,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5137a54442079c942b38bbaa8c7b6f5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  useTagFiltering: 0
-  propTag: ShelfProp
-  interactionLayers:
-    m_Bits: 1
-    m_Mask: 1
-  movementType: 2
-  enableThrowing: 1
-  autoSetupOnStart: 1
 --- !u!1001 &1047088882
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -20137,8 +20129,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1137535364}
-  - component: {fileID: 1137535366}
   - component: {fileID: 1137535365}
+  - component: {fileID: 1137535366}
   m_Layer: 0
   m_Name: StoveKnob_Right
   m_TagString: Untagged
@@ -20195,9 +20187,87 @@ MonoBehaviour:
   m_GameObject: {fileID: 1137535363}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f5e96888d356eb44abedd4dfc9c5d2f, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f4bd4c2dd348478588f653f60e09fce, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: '::'
+  m_EditorClassIdentifier: Assembly-CSharp::StoveKnob
+  m_InteractionManager: {fileID: 1501822391}
+  m_Colliders: []
+  m_InteractionLayers:
+    m_Bits: 1
+  m_DistanceCalculationMode: 1
+  m_SelectMode: 0
+  m_FocusMode: 1
+  m_CustomReticle: {fileID: 0}
+  m_AllowGazeInteraction: 0
+  m_AllowGazeSelect: 0
+  m_OverrideGazeTimeToSelect: 0
+  m_GazeTimeToSelect: 0.5
+  m_OverrideTimeToAutoDeselectGaze: 0
+  m_TimeToAutoDeselectGaze: 3
+  m_AllowGazeAssistance: 0
+  m_FirstHoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastHoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstSelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastSelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstFocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastFocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Activated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Deactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_StartingHoverFilters: []
+  m_StartingSelectFilters: []
+  m_StartingInteractionStrengthFilters: []
+  m_AutoFindParentInteractableInHierarchy: 0
+  m_ParentInteractableObject: {fileID: 0}
+  rotationAxis: {x: 0, y: 1, z: 0}
+  minAngle: 0
+  maxAngle: 270
+  clampRotation: 1
+  sensitivity: 3.5
+  invertDirection: 1
+  onThreshold: 15
+  OnBurnerOn:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBurnerOff:
+    m_PersistentCalls:
+      m_Calls: []
+  OnValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1141755398 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5964539918679900832, guid: ddc590ae56d02484faba95939304dc79, type: 3}
@@ -29192,8 +29262,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1619708034}
-  - component: {fileID: 1619708036}
   - component: {fileID: 1619708037}
+  - component: {fileID: 1619708038}
   m_Layer: 0
   m_Name: StoveKnob_Left
   m_TagString: Untagged
@@ -29218,18 +29288,6 @@ Transform:
   - {fileID: 1364139082}
   m_Father: {fileID: 451452417}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1619708036
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1619708033}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f5e96888d356eb44abedd4dfc9c5d2f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: '::'
 --- !u!136 &1619708037
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -29253,6 +29311,96 @@ CapsuleCollider:
   m_Height: 0.15574294
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1619708038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1619708033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f4bd4c2dd348478588f653f60e09fce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StoveKnob
+  m_InteractionManager: {fileID: 1501822391}
+  m_Colliders: []
+  m_InteractionLayers:
+    m_Bits: 1
+  m_DistanceCalculationMode: 1
+  m_SelectMode: 0
+  m_FocusMode: 1
+  m_CustomReticle: {fileID: 0}
+  m_AllowGazeInteraction: 0
+  m_AllowGazeSelect: 0
+  m_OverrideGazeTimeToSelect: 0
+  m_GazeTimeToSelect: 0.5
+  m_OverrideTimeToAutoDeselectGaze: 0
+  m_TimeToAutoDeselectGaze: 3
+  m_AllowGazeAssistance: 0
+  m_FirstHoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastHoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_HoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstSelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastSelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_SelectExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstFocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastFocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FocusExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Activated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Deactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_StartingHoverFilters: []
+  m_StartingSelectFilters: []
+  m_StartingInteractionStrengthFilters: []
+  m_AutoFindParentInteractableInHierarchy: 0
+  m_ParentInteractableObject: {fileID: 0}
+  rotationAxis: {x: 0, y: 1, z: 0}
+  minAngle: 0
+  maxAngle: 270
+  clampRotation: 1
+  sensitivity: 3.5
+  invertDirection: 1
+  onThreshold: 10
+  OnBurnerOn:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBurnerOff:
+    m_PersistentCalls:
+      m_Calls: []
+  OnValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &1630514165
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29910,6 +30058,7 @@ Transform:
   m_Children:
   - {fileID: 2052581447}
   - {fileID: 70406511}
+  - {fileID: 1733472501}
   m_Father: {fileID: 2053331552}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1671322555
@@ -30319,14 +30468,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad62fb184027043b096ed3c68c0711a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlateController
-  recipe: 0
-  requiredIngredients: 
-  proteinAnchor: {fileID: 768850188}
-  vegetableAnchor: {fileID: 83002422}
-  snapRange: 0.8
-  proteinIngredient: {fileID: 0}
-  vegetableIngredient: {fileID: 0}
-  completionText: {fileID: 774918856}
 --- !u!1001 &1705625033
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -31074,6 +31215,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2467845069284678478, guid: 3c0b460c20e5c954d8523df4157882d1, type: 3}
   m_PrefabInstance: {fileID: 1733251433}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1733472500
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1733472501}
+  m_Layer: 0
+  m_Name: Jump
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1733472501
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733472500}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1671322554}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1757374194
 GameObject:
   m_ObjectHideFlags: 0
@@ -35904,6 +36076,7 @@ GameObject:
   - component: {fileID: 2053331551}
   - component: {fileID: 2053331550}
   - component: {fileID: 2053331553}
+  - component: {fileID: 2053331555}
   - component: {fileID: 2053331554}
   m_Layer: 0
   m_Name: XR Origin (VR)
@@ -35942,7 +36115,7 @@ MonoBehaviour:
   m_OriginBaseGameObject: {fileID: 2053331549}
   m_CameraFloorOffsetObject: {fileID: 158373704}
   m_RequestedTrackingOriginMode: 0
-  m_CameraYOffset: 1.5
+  m_CameraYOffset: 0.3
 --- !u!4 &2053331552
 Transform:
   m_ObjectHideFlags: 0
@@ -35975,7 +36148,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BuffManager
   moveProvider: {fileID: 70406512}
---- !u!143 &2053331554
+--- !u!114 &2053331554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2053331549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bc84b59915924889810f2ce8fb880df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::XRHeightCalibrator
+  minHeight: 1.5
+  heightBuffer: 0.1
+  capsuleFootOffset: 0.05
+--- !u!143 &2053331555
 CharacterController:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -35991,7 +36179,7 @@ CharacterController:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.5

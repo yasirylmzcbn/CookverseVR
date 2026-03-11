@@ -1,100 +1,156 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.Events;
 
-public class StoveKnob : MonoBehaviour
+[RequireComponent(typeof(Collider))]
+public class StoveKnob : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable
 {
-    [Header("Rotation Settings")]
+    [Header("Rotation Axis")]
+    [Tooltip("Local-space axis the knob spins around. Y = up (flat knob on stove top).")]
+    [SerializeField] private Vector3 rotationAxis = Vector3.up;
+
+    [Header("Angle Limits")]
     [SerializeField] private float minAngle = 0f;
     [SerializeField] private float maxAngle = 270f;
-    [SerializeField] private float onThreshold = 10f; // degrees past min to count as "on"
+    [SerializeField] private bool clampRotation = true;
 
-    [Header("Axis")]
-    [SerializeField] private Vector3 rotationAxis = Vector3.forward; // local axis to rotate around
+    [Header("Rotation Feel")]
+    [Tooltip("Multiplies how fast the knob responds to hand movement. Increase if it feels too slow.")]
+    [SerializeField] private float sensitivity = 2.5f;
+    [Tooltip("Flip this if the knob rotates the wrong way.")]
+    [SerializeField] private bool invertDirection = false;
 
-    public bool IsOn { get; private set; }
-    public float HeatLevel { get; private set; } // 0-1
+    [Header("Stove On/Off")]
+    [SerializeField] private float onThreshold = 15f;
 
-    public event System.Action<bool, float> onKnobChanged;
+    [Header("Events")]
+    public UnityEvent OnBurnerOn;
+    public UnityEvent OnBurnerOff;
+    public UnityEvent<float> OnValueChanged;
 
-    private XRGrabInteractable grabInteractable;
-    private Transform grabbingHand;
-    private Vector3 lockedPosition;
-    private float currentAngle = 0f;
+    // ──────────────────────────── State ────────────────────────────────
 
-    void Awake()
+    private float currentAngle;
+    private bool burnerIsOn;
+
+    private UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor activeInteractor;
+    private Vector3 previousProjected;
+    private Vector3 knobWorldPos;
+    private Vector3 cachedLocalScale;  // preserve original scale
+
+    public float CurrentAngle => currentAngle;
+    public float NormalizedValue => Mathf.InverseLerp(minAngle, maxAngle, currentAngle);
+    public bool IsOn => burnerIsOn;
+
+    protected override void Awake()
     {
-        grabInteractable = GetComponent<XRGrabInteractable>();
-
-        // Lock position - don't move, only rotate
-        grabInteractable.trackPosition = false;
-        grabInteractable.trackRotation = false; // we'll override rotation manually
-
-        grabInteractable.selectEntered.AddListener(OnGrabbed);
-        grabInteractable.selectExited.AddListener(OnReleased);
-
-        lockedPosition = transform.localPosition;
+        base.Awake();
+        cachedLocalScale = transform.localScale;  // cache so we restore correctly
+        currentAngle = minAngle;
+        ApplyRotation();
     }
 
-    void OnGrabbed(SelectEnterEventArgs args)
+    protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
-        grabbingHand = args.interactorObject.transform;
+        base.OnSelectEntered(args);
+        activeInteractor = args.interactorObject;
+        knobWorldPos = transform.position;
+
+        Vector3 handOffset = GetInteractorPosition() - knobWorldPos;
+        previousProjected = ProjectOntoPlane(handOffset);
     }
 
-    void OnReleased(SelectExitEventArgs args)
+    protected override void OnSelectExited(SelectExitEventArgs args)
     {
-        grabbingHand = null;
+        base.OnSelectExited(args);
+        activeInteractor = null;
     }
 
-    void Update()
+    public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase)
     {
-        // Always lock position
-        transform.localPosition = lockedPosition;
+        base.ProcessInteractable(updatePhase);
 
-        if (grabbingHand == null) return;
+        if (updatePhase != XRInteractionUpdateOrder.UpdatePhase.Dynamic) return;
+        if (activeInteractor == null) return;
 
-        // Get the world-space rotation axis
-        Vector3 worldAxis = transform.parent != null
-            ? transform.parent.TransformDirection(rotationAxis)
-            : rotationAxis;
+        // Lock position and scale
+        transform.position = knobWorldPos;
+        transform.localScale = cachedLocalScale;
 
-        // Vector from knob to hand
-        Vector3 toHand = grabbingHand.position - transform.position;
+        Vector3 handOffset = GetInteractorPosition() - knobWorldPos;
+        Vector3 currentProjected = ProjectOntoPlane(handOffset);
 
-        // Project onto the plane perpendicular to the rotation axis
-        Vector3 projected = Vector3.ProjectOnPlane(toHand, worldAxis);
-
-        if (projected.sqrMagnitude < 0.001f) return; // hand is directly on axis, skip
-
-        // Measure angle from a fixed reference direction (world up projected onto plane)
-        Vector3 reference = Vector3.ProjectOnPlane(Vector3.up, worldAxis).normalized;
-        float angle = Vector3.SignedAngle(reference, projected.normalized, worldAxis);
-
-        // Remap from [-180,180] to [0,360] then clamp
-        angle = (angle + 360f) % 360f;
-        angle = Mathf.Clamp(angle, minAngle, maxAngle);
-
-        SetAngle(angle);
-    }
-
-    void SetAngle(float angle)
-    {
-        currentAngle = angle;
-
-        // Apply rotation around the local axis
-        Quaternion localRot = Quaternion.AngleAxis(currentAngle, rotationAxis);
-        transform.localRotation = localRot;
-
-        // Calculate heat level (0-1)
-        float newHeat = Mathf.InverseLerp(minAngle, maxAngle, currentAngle);
-        bool newIsOn = currentAngle > (minAngle + onThreshold);
-
-        // Only fire event if something changed
-        if (newIsOn != IsOn || Mathf.Abs(newHeat - HeatLevel) > 0.01f)
+        if (currentProjected.sqrMagnitude < 0.0001f || previousProjected.sqrMagnitude < 0.0001f)
         {
-            IsOn = newIsOn;
-            HeatLevel = newHeat;
-            onKnobChanged?.Invoke(IsOn, HeatLevel);
+            previousProjected = currentProjected;
+            return;
+        }
+
+        Vector3 worldAxis = transform.TransformDirection(rotationAxis.normalized);
+        float angleDelta = Vector3.SignedAngle(previousProjected, currentProjected, worldAxis);
+
+        // Apply sensitivity and optional invert
+        angleDelta *= sensitivity;
+        if (invertDirection) angleDelta = -angleDelta;
+
+        float newAngle = currentAngle + angleDelta;
+        if (clampRotation)
+            newAngle = Mathf.Clamp(newAngle, minAngle, maxAngle);
+
+        currentAngle = newAngle;
+        previousProjected = currentProjected;
+
+        ApplyRotation();
+        OnValueChanged?.Invoke(NormalizedValue);
+        UpdateBurnerState();
+    }
+
+    private void ApplyRotation()
+    {
+        transform.localRotation = Quaternion.AngleAxis(currentAngle, rotationAxis.normalized);
+    }
+
+    private Vector3 ProjectOntoPlane(Vector3 v)
+    {
+        Vector3 worldAxis = transform.TransformDirection(rotationAxis.normalized);
+        return v - Vector3.Dot(v, worldAxis) * worldAxis;
+    }
+
+    private Vector3 GetInteractorPosition()
+    {
+        return activeInteractor.GetAttachTransform(this).position;
+    }
+
+    private void UpdateBurnerState()
+    {
+        bool shouldBeOn = currentAngle >= (minAngle + onThreshold);
+
+        if (shouldBeOn && !burnerIsOn)
+        {
+            burnerIsOn = true;
+            OnBurnerOn?.Invoke();
+            Debug.Log("[StoveKnob] Burner ON");
+        }
+        else if (!shouldBeOn && burnerIsOn)
+        {
+            burnerIsOn = false;
+            OnBurnerOff?.Invoke();
+            Debug.Log("[StoveKnob] Burner OFF");
         }
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.cyan;
+        Vector3 dir = transform.TransformDirection(rotationAxis.normalized);
+        Gizmos.DrawLine(transform.position - dir * 0.1f, transform.position + dir * 0.1f);
+
+        UnityEditor.Handles.color = new Color(0f, 1f, 0.5f, 0.3f);
+        UnityEditor.Handles.DrawSolidArc(
+            transform.position, dir,
+            Quaternion.AngleAxis(minAngle, dir) * Vector3.right,
+            maxAngle - minAngle, 0.05f);
+    }
+#endif
 }
