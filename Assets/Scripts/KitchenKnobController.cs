@@ -1,13 +1,15 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using System.Collections.Generic;
 
-public class StoveKnob : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable
+public class KitchenKnob : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable
 {
     [Header("Knob Settings")]
     public float minAngle = -150f;
     public float maxAngle = 150f;
     public float minValue = 0f;
     public float maxValue = 10f;
+    public Vector3 rotationAxis = Vector3.up;
 
     [Header("Snapping (optional)")]
     public bool snapToSteps = false;
@@ -18,6 +20,7 @@ public class StoveKnob : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBase
     private float _currentAngle = 0f;
     private float _previousHandAngle;
     private UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor _interactor;
+
 
     protected override void OnSelectEntered(SelectEnterEventArgs args)
     {
@@ -52,7 +55,7 @@ public class StoveKnob : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBase
         float actualDelta = newAngle - _currentAngle;
         _currentAngle = newAngle;
 
-        transform.Rotate(Vector3.up, actualDelta, Space.Self);
+        transform.Rotate(rotationAxis, actualDelta, Space.Self);
 
         float t = Mathf.InverseLerp(minAngle, maxAngle, _currentAngle);
         CurrentValue = Mathf.Lerp(minValue, maxValue, t);
@@ -66,7 +69,21 @@ public class StoveKnob : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBase
     float GetAngleOnKnobPlane(Vector3 worldPos)
     {
         Vector3 local = transform.InverseTransformPoint(worldPos);
-        return Mathf.Atan2(local.z, local.x) * Mathf.Rad2Deg;
+
+        // hash map that holds the axis as the key and the value will be the local direction pair for that axis. 
+        Dictionary<Vector3, Vector2> axisToLocal = new Dictionary<Vector3, Vector2>
+        {
+            { Vector3.right, new Vector2(local.y, local.z) },
+            { Vector3.up, new Vector2(local.x, local.z) },
+            { Vector3.forward, new Vector2(local.x, local.y) }
+        };
+        if (!axisToLocal.TryGetValue(rotationAxis, out Vector2 dir))
+        {
+            Debug.LogError($"Invalid rotation axis {rotationAxis} on {gameObject.name}. Defaulting to up.");
+            dir = axisToLocal[Vector3.up];
+        }
+
+        return Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
     }
 
     protected virtual void OnValueChanged(float value)
