@@ -20,6 +20,8 @@ public class Ingredient : MonoBehaviour
 
     [Tooltip("Interaction Layer Mask to apply when chopped (cook-ready).")]
     [SerializeField] private InteractionLayerMask cookReadyInteractionLayer;
+    [SerializeField] private InteractionLayerMask cookedInteractionLayer;
+    [SerializeField] private InteractionLayerMask burntInteractionLayer;
 
     [Header("Cooking")]
     [SerializeField] private float cookLevel = 0f;
@@ -114,6 +116,7 @@ public class Ingredient : MonoBehaviour
     private void OnFullyCooked()
     {
         isCooked = true;
+        grabInteractable.interactionLayers = cookedInteractionLayer;
         SwapMaterial(cookedMaterial);
         Debug.Log($"{gameObject.name} is fully cooked!");
     }
@@ -121,6 +124,7 @@ public class Ingredient : MonoBehaviour
     private void OnBurnt()
     {
         isBurnt = true;
+        grabInteractable.interactionLayers = burntInteractionLayer;
         SwapMaterial(burntMaterial);
         Debug.Log($"{gameObject.name} is burnt!");
     }
