@@ -7,7 +7,8 @@ public class KitchenTimerManager : MonoBehaviour
 
     [Header("Challenge Settings")]
     public float challengeDuration = 120f;
-    public int totalZones = 3; // how many zones must be completed
+    public int totalZones = 3;
+    private ItemDropZone[] zones;
 
     [Header("UI")]
     [SerializeField] public TextMeshProUGUI timerText;
@@ -17,8 +18,19 @@ public class KitchenTimerManager : MonoBehaviour
     private bool challengeActive;
     private int zonesCompleted;
 
+    private void Start()
+    {
+        zones = FindObjectsOfType<ItemDropZone>();
+    }
+
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
     }
 
@@ -35,10 +47,11 @@ public class KitchenTimerManager : MonoBehaviour
         if (timer <= 0f)
         {
             ChallengeFailed();
+            return;
         }
     }
 
-    // ?? Start challenge (called by VR button)
+    // Start challenge (called by VR button)
     public void StartChallenge()
     {
         if (challengeActive) return;
@@ -60,7 +73,7 @@ public class KitchenTimerManager : MonoBehaviour
         }
 
         // Reset all zones
-        foreach (ItemDropZone zone in FindObjectsOfType<ItemDropZone>())
+        foreach (ItemDropZone zone in zones)
         {
             zone.ResetZone();
         }

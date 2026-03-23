@@ -1,17 +1,16 @@
 using UnityEngine;
 
-
 public class ItemDropZone : MonoBehaviour
 {
     [Header("Zone Settings")]
     public ItemType acceptedItem;
 
-    [Header("Visuals")]
+    [Header("Visual (Assign your Plane here)")]
     public Renderer zoneRenderer;
-    public Color idleColor = Color.white;
-    public Color highlightColor = Color.yellow;
+
+    [Header("Colors")]
+    public Color idleColor = Color.black;
     public Color correctColor = Color.green;
-    public Color wrongColor = Color.red;
 
     private bool completed = false;
     private Material mat;
@@ -32,7 +31,7 @@ public class ItemDropZone : MonoBehaviour
         ItemIdentity item = other.GetComponentInParent<ItemIdentity>();
         if (item == null) return;
 
-        UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grab = other.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        var grab = other.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
         if (grab != null && grab.isSelected) return;
 
         if (item.itemType == acceptedItem)
@@ -41,28 +40,11 @@ public class ItemDropZone : MonoBehaviour
 
             SetColor(correctColor);
 
+            Debug.Log("Correct item placed: " + item.itemType);
+
             KitchenTimerManager.Instance.ZoneCompleted(this);
 
-            SnapItem(other.transform.root.gameObject);
-        }
-        else
-        {
-            // flash red briefly
-            StartCoroutine(FlashWrong());
-        }
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (completed) return;
-
-        ItemIdentity item = other.GetComponentInParent<ItemIdentity>();
-        if (item == null) return;
-
-        // Highlight if correct item is nearby
-        if (item.itemType == acceptedItem)
-        {
-            SetColor(highlightColor);
+            SnapItem(item.gameObject);
         }
     }
 
@@ -79,22 +61,17 @@ public class ItemDropZone : MonoBehaviour
         {
             mat.color = color;
 
-            // Optional: emission glow
             mat.EnableKeyword("_EMISSION");
-            mat.SetColor("_EmissionColor", color * 2f);
+            mat.SetColor("_EmissionColor", color * 3f);
         }
-    }
-
-    private System.Collections.IEnumerator FlashWrong()
-    {
-        SetColor(wrongColor);
-        yield return new WaitForSeconds(0.3f);
-        SetColor(idleColor);
     }
 
     private void SnapItem(GameObject obj)
     {
-        obj.transform.position = transform.position;
+        obj.transform.SetPositionAndRotation(
+            transform.position,
+            transform.rotation
+        );
 
         Rigidbody rb = obj.GetComponent<Rigidbody>();
         if (rb != null)
@@ -102,6 +79,12 @@ public class ItemDropZone : MonoBehaviour
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             rb.isKinematic = true;
+        }
+
+        var grab = obj.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        if (grab != null)
+        {
+            grab.enabled = false;
         }
     }
 
