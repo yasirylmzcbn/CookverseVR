@@ -51,5 +51,8 @@ public enum ItemType
     Food_Corn,
     Food_Oil,
     Food_Milk,
-    Food_Potato
+    Food_Potato,
+    Food_FrenchFries,
+    Food_Soup,
+    Food_CookedRice
 }
