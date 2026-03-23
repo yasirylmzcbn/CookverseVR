@@ -18,7 +18,6 @@ public class CookwareSlot : MonoBehaviour
 
     private void Awake()
     {
-        // Auto-find sockets on this GameObject if none assigned
         if (ingredientSockets == null || ingredientSockets.Length == 0)
             ingredientSockets = GetComponentsInChildren<XRSocketInteractor>();
     }
@@ -35,7 +34,6 @@ public class CookwareSlot : MonoBehaviour
         foreach (var socket in ingredientSockets)
         {
             Ingredient ingredient = GetIngredientInSocket(socket);
-            Debug.Log($"yasir123 Checking socket {socket.gameObject.name} for ingredient. Found: {(ingredient != null ? ingredient.gameObject.name : "None")}");
             if (ingredient != null)
                 ingredient.Cook(heat);
         }
