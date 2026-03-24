@@ -32,24 +32,14 @@ public class ShrinkScript : MonoBehaviour
             trigger.shrinkScript = this;
 
             var col = shrinker.GetComponent<Collider>();
-            if (col == null)
+            if (col != null)
             {
-                col = shrinker.AddComponent<BoxCollider>();
+                col.isTrigger = true;
             }
-            col.isTrigger = true;
-
-            // Adding a kinematic Rigidbody to the trigger guarantees the physics engine 
-            // will detect collisions, even if the other object is kinematic or moved by hands.
-            var rb = shrinker.GetComponent<Rigidbody>();
-            if (rb == null)
+            else
             {
-                rb = shrinker.AddComponent<Rigidbody>();
+                Debug.LogWarning("[ShrinkScript] No Collider found on the shrinker object! Please add one manually in the inspector.");
             }
-            // Make sure the Rigidbody is NOT kinematic to test if that resolves trigger detection
-            rb.isKinematic = false; 
-            rb.useGravity = false;
-            // Continuous collision detection sometimes helps catch fast-moving objects
-            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         }
         else
         {
@@ -94,30 +84,30 @@ public class ShrinkScript : MonoBehaviour
     public void ShrinkObject(GameObject target)
     {
         // Check if the target OR any of its parent objects have the "Pickup" tag
-        // (XR Grab Interactables often have colliders on child objects)
+        // or a ShelfItemData component. XR Grab Interactables often have colliders on child objects.
         Transform current = target.transform;
-        bool hasTag = false;
-        Transform rootWithTag = null;
+        bool shouldShrink = false;
+        Transform rootToShrink = null;
 
         while (current != null)
         {
-            if (current.CompareTag("Pickup"))
+            if (current.CompareTag("Pickup") || current.GetComponent<ShelfItemData>() != null)
             {
-                hasTag = true;
-                rootWithTag = current;
+                shouldShrink = true;
+                rootToShrink = current;
                 break;
             }
             current = current.parent;
         }
 
-        if (hasTag && rootWithTag != null)
+        if (shouldShrink && rootToShrink != null)
         {
-            Debug.Log($"[ShrinkScript] Resizing {rootWithTag.name} to scale {currentScale}");
-            rootWithTag.localScale = Vector3.one * currentScale;
+            Debug.Log($"[ShrinkScript] Resizing {rootToShrink.name} to scale {currentScale}");
+            rootToShrink.localScale = Vector3.one * currentScale;
         }
         else
         {
-            Debug.Log($"[ShrinkScript] Ignoring {target.name} because neither it nor its parents have the 'Pickup' tag.");
+            Debug.Log($"[ShrinkScript] Ignoring {target.name} because neither it nor its parents have the 'Pickup' tag or a ShelfItemData component.");
         }
     }
 }
