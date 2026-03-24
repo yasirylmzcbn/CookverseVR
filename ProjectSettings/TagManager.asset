@@ -5,11 +5,12 @@ TagManager:
   serializedVersion: 3
   tags:
   - Pickup
+  - Ingredient
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Overlay UI
   - Water
   - UI
   - ShelfContainer

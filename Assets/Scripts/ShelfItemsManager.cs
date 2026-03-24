@@ -57,7 +57,7 @@ public class ShelfItemsManager : MonoBehaviour
     {
         if (shelfItemPrefabs == null || shelfItemPrefabs.Count == 0)
         {
-            Debug.LogWarning("No shelf item prefabs assigned to ShelfItemsManager. Please add items to the list.", this);
+            // Debug.LogWarning("No shelf item prefabs assigned to ShelfItemsManager. Please add items to the list.", this);
             return;
         }
 
@@ -68,55 +68,55 @@ public class ShelfItemsManager : MonoBehaviour
         // (IngredientDistributionManager will call RefreshItems after setting up the mapping)
         if (!oneIngredientPerShelf)
         {
-            Debug.Log("ShelfItemsManager: Auto-spawning items (random mode)");
+            // Debug.Log("ShelfItemsManager: Auto-spawning items (random mode)");
             ReplaceShelfItems();
         }
         else
         {
-            Debug.Log("ShelfItemsManager: Waiting for IngredientDistributionManager to set mapping");
+            // Debug.Log("ShelfItemsManager: Waiting for IngredientDistributionManager to set mapping");
         }
     }
 
     private void LogAvailablePrefabs()
     {
-        Debug.Log($"ShelfItemsManager: Available prefabs ({shelfItemPrefabs.Count} total):");
+        // Debug.Log($"ShelfItemsManager: Available prefabs ({shelfItemPrefabs.Count} total):");
         Dictionary<ItemType, int> prefabsByType = new Dictionary<ItemType, int>();
-        
+
         foreach (var prefab in shelfItemPrefabs)
         {
             ShelfItemData itemData = prefab.GetComponent<ShelfItemData>();
             if (itemData != null)
             {
-                Debug.Log($"  - {prefab.name}: {itemData.itemType}");
+                // Debug.Log($"  - {prefab.name}: {itemData.itemType}");
                 if (!prefabsByType.ContainsKey(itemData.itemType))
                     prefabsByType[itemData.itemType] = 0;
                 prefabsByType[itemData.itemType]++;
             }
             else
             {
-                Debug.LogWarning($"  - {prefab.name}: NO ShelfItemData COMPONENT!");
+                // Debug.LogWarning($"  - {prefab.name}: NO ShelfItemData COMPONENT!");
             }
         }
-        
+
         // Show summary
-        Debug.Log("Prefabs by ItemType:");
+        // Debug.Log("Prefabs by ItemType:");
         foreach (var kvp in prefabsByType)
         {
-            Debug.Log($"  {kvp.Key}: {kvp.Value} prefab(s)");
+            // Debug.Log($"  {kvp.Key}: {kvp.Value} prefab(s)");
         }
-        
+
         // Check for missing ItemTypes
         ItemType[] allItemTypes = System.Enum.GetValues(typeof(ItemType)) as ItemType[];
-        Debug.Log($"ItemTypes in enum ({allItemTypes.Length} total):");
+        // Debug.Log($"ItemTypes in enum ({allItemTypes.Length} total):");
         foreach (var itemType in allItemTypes)
         {
             if (!prefabsByType.ContainsKey(itemType))
             {
-                Debug.LogWarning($"  MISSING: {itemType} - No prefab assigned!");
+                // Debug.LogWarning($"  MISSING: {itemType} - No prefab assigned!");
             }
             else
             {
-                Debug.Log($"  OK: {itemType}");
+                // Debug.Log($"  OK: {itemType}");
             }
         }
     }
@@ -162,8 +162,8 @@ public class ShelfItemsManager : MonoBehaviour
     public void SetIngredientMapping(Dictionary<Transform, ItemType> ingredientMap)
     {
         shelfToIngredientMap = ingredientMap;
-        Debug.Log($"ShelfItemsManager: Set ingredient mapping for {ingredientMap.Count} shelves");
-        
+        // Debug.Log($"ShelfItemsManager: Set ingredient mapping for {ingredientMap.Count} shelves");
+
         // Log the ingredient distribution by type
         Dictionary<ItemType, int> typeCount = new Dictionary<ItemType, int>();
         foreach (var itemType in ingredientMap.Values)
@@ -172,10 +172,10 @@ public class ShelfItemsManager : MonoBehaviour
                 typeCount[itemType] = 0;
             typeCount[itemType]++;
         }
-        
+
         foreach (var kvp in typeCount)
         {
-            Debug.Log($"  - {kvp.Key}: {kvp.Value} shelves");
+            // Debug.Log($"  - {kvp.Key}: {kvp.Value} shelves");
         }
     }
 
@@ -187,15 +187,15 @@ public class ShelfItemsManager : MonoBehaviour
     {
         List<Transform> propsToReplace = FindInnerMostProps(transform);
 
-        Debug.Log($"Found {propsToReplace.Count} props to replace on {gameObject.name}");
-        Debug.Log($"oneIngredientPerShelf: {oneIngredientPerShelf}, ingredientMap count: {shelfToIngredientMap.Count}");
+        // Debug.Log($"Found {propsToReplace.Count} props to replace on {gameObject.name}");
+        // Debug.Log($"oneIngredientPerShelf: {oneIngredientPerShelf}, ingredientMap count: {shelfToIngredientMap.Count}");
 
         foreach (Transform prop in propsToReplace)
         {
             SpawnRandomItem(prop);
         }
 
-        Debug.Log($"Successfully replaced {spawnedItems.Count} shelf items on {gameObject.name}");
+        // Debug.Log($"Successfully replaced {spawnedItems.Count} shelf items on {gameObject.name}");
         DumpItemTypeDistribution();
     }
 
@@ -203,18 +203,18 @@ public class ShelfItemsManager : MonoBehaviour
     {
         ShelfItemData[] allItems = FindObjectsOfType<ShelfItemData>();
         Dictionary<ItemType, int> distribution = new Dictionary<ItemType, int>();
-        
+
         foreach (ShelfItemData item in allItems)
         {
             if (!distribution.ContainsKey(item.itemType))
                 distribution[item.itemType] = 0;
             distribution[item.itemType]++;
         }
-        
-        Debug.Log($"ShelfItemsManager: Item type distribution in scene ({allItems.Length} total items):");
+
+        // Debug.Log($"ShelfItemsManager: Item type distribution in scene ({allItems.Length} total items):");
         foreach (var kvp in distribution)
         {
-            Debug.Log($"  {kvp.Key}: {kvp.Value} items");
+            // Debug.Log($"  {kvp.Key}: {kvp.Value} items");
         }
     }
 
@@ -227,22 +227,22 @@ public class ShelfItemsManager : MonoBehaviour
         {
             // Find which shelf this prop belongs to
             Transform parentShelf = GetShelfForProp(prop);
-            
+
             if (parentShelf != null && shelfToIngredientMap.ContainsKey(parentShelf))
             {
                 // Get the assigned ingredient type for this shelf
                 ItemType ingredientType = shelfToIngredientMap[parentShelf];
                 spawnedItemType = ingredientType;
                 prefabToSpawn = GetPrefabByIngredientType(ingredientType);
-                
+
                 if (prefabToSpawn == null)
                 {
-                    Debug.LogWarning($"ShelfItemsManager: No prefab found for ingredient type {ingredientType} on shelf {parentShelf.name}, using random prefab as fallback");
+                    // Debug.LogWarning($"ShelfItemsManager: No prefab found for ingredient type {ingredientType} on shelf {parentShelf.name}, using random prefab as fallback");
                     prefabToSpawn = shelfItemPrefabs[Random.Range(0, shelfItemPrefabs.Count)];
                 }
                 else
                 {
-                    Debug.Log($"ShelfItemsManager: Spawning {ingredientType} on shelf {parentShelf.name} at prop {prop.name}");
+                    // Debug.Log($"ShelfItemsManager: Spawning {ingredientType} on shelf {parentShelf.name} at prop {prop.name}");
                 }
             }
             else
@@ -250,14 +250,14 @@ public class ShelfItemsManager : MonoBehaviour
                 // Error case - couldn't find shelf
                 if (parentShelf == null)
                 {
-                    Debug.LogError($"ShelfItemsManager: Could not find parent shelf for prop {prop.name}! Using random ingredient. Prop hierarchy: {GetHierarchyPath(prop)}");
+                    // Debug.LogError($"ShelfItemsManager: Could not find parent shelf for prop {prop.name}! Using random ingredient. Prop hierarchy: {GetHierarchyPath(prop)}");
                 }
                 else
                 {
-                    Debug.LogError($"ShelfItemsManager: Shelf {parentShelf.name} not in ingredient map! Using random ingredient.");
+                    // Debug.LogError($"ShelfItemsManager: Shelf {parentShelf.name} not in ingredient map! Using random ingredient.");
                 }
                 prefabToSpawn = shelfItemPrefabs[Random.Range(0, shelfItemPrefabs.Count)];
-                
+
                 // Try to get ItemType from the random prefab
                 ShelfItemData prefabData = prefabToSpawn.GetComponent<ShelfItemData>();
                 if (prefabData != null)
@@ -271,17 +271,17 @@ public class ShelfItemsManager : MonoBehaviour
             // Random selection (original behavior)
             int randomIndex = Random.Range(0, shelfItemPrefabs.Count);
             prefabToSpawn = shelfItemPrefabs[randomIndex];
-            
+
             // Get the ItemType from the prefab's ShelfItemData if available
             ShelfItemData prefabData = prefabToSpawn.GetComponent<ShelfItemData>();
             if (prefabData != null)
             {
                 spawnedItemType = prefabData.itemType;
-                Debug.Log($"ShelfItemsManager: Selected random prefab index {randomIndex} with type {spawnedItemType}");
+                // Debug.Log($"ShelfItemsManager: Selected random prefab index {randomIndex} with type {spawnedItemType}");
             }
             else
             {
-                Debug.LogWarning($"ShelfItemsManager: Selected random prefab {prefabToSpawn.name} has no ShelfItemData! Using default type.");
+                // Debug.LogWarning($"ShelfItemsManager: Selected random prefab {prefabToSpawn.name} has no ShelfItemData! Using default type.");
             }
         }
 
@@ -295,15 +295,15 @@ public class ShelfItemsManager : MonoBehaviour
         if (itemData != null)
         {
             itemData.itemType = spawnedItemType;
-            
+
             // Rename the item to match its ItemType for clarity and consistency
             newItem.name = spawnedItemType.ToString();
-            
-            Debug.Log($"ShelfItemsManager: Item spawned with type {spawnedItemType} at {newItem.name}");
+
+            // Debug.Log($"ShelfItemsManager: Item spawned with type {spawnedItemType} at {newItem.name}");
         }
         else
         {
-            Debug.LogWarning($"ShelfItemsManager: Spawned item {newItem.name} has no ShelfItemData component!");
+            // Debug.LogWarning($"ShelfItemsManager: Spawned item {newItem.name} has no ShelfItemData component!");
         }
 
         if (parentToShelf)
@@ -353,7 +353,7 @@ public class ShelfItemsManager : MonoBehaviour
 
         if (matchingPrefabs.Count == 0)
         {
-            Debug.LogWarning($"ShelfItemsManager: No prefab found for ingredient type {targetType}! This needs to be assigned in the Inspector.");
+            // Debug.LogWarning($"ShelfItemsManager: No prefab found for ingredient type {targetType}! This needs to be assigned in the Inspector.");
         }
 
         // Return a random matching prefab, or null if none found
@@ -390,7 +390,7 @@ public class ShelfItemsManager : MonoBehaviour
         {
             rb = item.AddComponent<Rigidbody>();
         }
-        
+
         // Start as kinematic (not affected by physics) until grabbed
         rb.useGravity = false;
         rb.isKinematic = true;  // Changed from false to true
@@ -404,7 +404,7 @@ public class ShelfItemsManager : MonoBehaviour
             if (col == null)
             {
                 col = item.AddComponent<BoxCollider>();
-                Debug.LogWarning($"No collider found on {item.name}, added BoxCollider. Consider adjusting manually.", item);
+                // Debug.LogWarning($"No collider found on {item.name}, added BoxCollider. Consider adjusting manually.", item);
             }
         }
 
@@ -414,11 +414,11 @@ public class ShelfItemsManager : MonoBehaviour
         {
             grabInteractable = item.AddComponent<XRGrabInteractable>();
             ConfigureGrabInteractable(grabInteractable);
-            Debug.Log($"Added XRGrabInteractable to {item.name}", item);
+            // Debug.Log($"Added XRGrabInteractable to {item.name}", item);
         }
         else
         {
-            Debug.Log($"XRGrabInteractable already exists on {item.name}", item);
+            // Debug.Log($"XRGrabInteractable already exists on {item.name}", item);
         }
 
         ShelfItemData data = item.GetComponent<ShelfItemData>();
@@ -427,7 +427,7 @@ public class ShelfItemsManager : MonoBehaviour
         {
             grabInteractable.selectEntered.AddListener((args) =>
             {
-                Debug.Log($"ShelfItemsManager: Item grabbed - Type: {data.itemType}, Item: {item.name}");
+                // Debug.Log($"ShelfItemsManager: Item grabbed - Type: {data.itemType}, Item: {item.name}");
                 if (TimedChallengeManager.Instance != null)
                 {
                     TimedChallengeManager.Instance
@@ -435,13 +435,13 @@ public class ShelfItemsManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("ShelfItemsManager: TimedChallengeManager.Instance is null!");
+                    // Debug.LogWarning("ShelfItemsManager: TimedChallengeManager.Instance is null!");
                 }
             });
         }
         else
         {
-            Debug.LogWarning($"ShelfItemsManager: Item {item.name} has no ShelfItemData component!");
+            // Debug.LogWarning($"ShelfItemsManager: Item {item.name} has no ShelfItemData component!");
         }
     }
 
@@ -457,7 +457,7 @@ public class ShelfItemsManager : MonoBehaviour
         grabInteractable.retainTransformParent = false;
         grabInteractable.trackPosition = true;
         grabInteractable.trackRotation = true;
-        
+
         // Make rigidbody non-kinematic when grabbed, kinematic when released
         grabInteractable.selectEntered.AddListener((args) =>
         {
@@ -527,12 +527,12 @@ public class ShelfItemsManager : MonoBehaviour
     {
         // Walk up the hierarchy to find the shelf
         Transform current = prop.parent;
-        
+
         int levelsUp = 0;
         while (current != null && current != transform)
         {
             levelsUp++;
-            
+
             // Check if this is a shelf by:
             // 1. Seeing if its parent is a row (contains "row")
             // 2. OR if it's named like a shelf (contains "shelf" or "prop_storage")
@@ -540,37 +540,37 @@ public class ShelfItemsManager : MonoBehaviour
             {
                 string parentName = current.parent.name.ToLower();
                 string currentName = current.name.ToLower();
-                
+
                 // Is the parent a row? Then this is a shelf
                 if (parentName.Contains("row"))
                 {
-                    Debug.Log($"ShelfItemsManager: Prop {prop.name} belongs to shelf {current.name}");
+                    // Debug.Log($"ShelfItemsManager: Prop {prop.name} belongs to shelf {current.name}");
                     return current;
                 }
-                
+
                 // Is this named like a shelf/storage prop? Then it's probably the shelf
                 if (currentName.Contains("shelf") || currentName.Contains("storage"))
                 {
                     // Double check if its parent is a row
                     if (current.parent.name.ToLower().Contains("row"))
                     {
-                        Debug.Log($"ShelfItemsManager: Prop {prop.name} belongs to shelf {current.name}");
+                        // Debug.Log($"ShelfItemsManager: Prop {prop.name} belongs to shelf {current.name}");
                         return current;
                     }
                 }
             }
-            
+
             current = current.parent;
-            
+
             // Safety check to avoid infinite loops
             if (levelsUp > 10)
             {
-                Debug.LogWarning($"ShelfItemsManager: Couldn't find shelf for prop {prop.name} after {levelsUp} levels");
+                // Debug.LogWarning($"ShelfItemsManager: Couldn't find shelf for prop {prop.name} after {levelsUp} levels");
                 break;
             }
         }
-        
-        Debug.LogError($"ShelfItemsManager: Could not determine shelf for prop {prop.name}. Hierarchy: {GetHierarchyPath(prop)}");
+
+        // Debug.LogError($"ShelfItemsManager: Could not determine shelf for prop {prop.name}. Hierarchy: {GetHierarchyPath(prop)}");
         return null;
     }
 

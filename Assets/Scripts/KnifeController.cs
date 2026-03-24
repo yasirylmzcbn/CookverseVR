@@ -26,8 +26,6 @@ public class KnifeController : MonoBehaviour
 
     void Update()
     {
-        if (rb != null)
-            Debug.Log($"Velocity: {rb.linearVelocity}, Speed: {rb.linearVelocity.magnitude}");
         velocity = (transform.position - lastPosition) / Time.deltaTime;
         lastPosition = transform.position;
 

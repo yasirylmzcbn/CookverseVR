@@ -3,7 +3,8 @@ using UnityEngine;
 public class ItemDropZone : MonoBehaviour
 {
     [Header("Zone Settings")]
-    public ItemType acceptedItem;
+    public IngredientType acceptedItem;
+
 
     [Header("Visual (Assign your Plane here)")]
     public Renderer zoneRenderer;
@@ -27,25 +28,25 @@ public class ItemDropZone : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (completed) return;
-
-        ItemIdentity item = other.GetComponentInParent<ItemIdentity>();
-        if (item == null) return;
-
-        var grab = other.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
-        if (grab != null && grab.isSelected) return;
-
-        if (item.itemType == acceptedItem)
+        Debug.Log("yasir123 Item entered drop zone: " + other.gameObject + " " + other.gameObject.name);
+        // get IngredientController script from the gameobjec
+        Ingredient ingredient = other.GetComponentInParent<Ingredient>();
+        if (ingredient != null)
         {
-            completed = true;
-
-            SetColor(correctColor);
-
-            Debug.Log("Correct item placed: " + item.itemType);
-
-            KitchenTimerManager.Instance.ZoneCompleted(this);
-
-            SnapItem(item.gameObject);
+            Debug.Log($"yasir123 Found Ingredient on {other.gameObject.name}");
+            if (ingredient.ingredientType == acceptedItem && ingredient.grabInteractable.interactionLayers == ingredient.cookedInteractionLayer)
+            {
+                completed = true;
+                SetColor(correctColor);
+                Debug.Log("Correct item placed: " + ingredient.ingredientType); KitchenTimerManager.Instance.ZoneCompleted(this);
+                SnapItem(ingredient.gameObject);
+            }
         }
+        else
+        {
+            Debug.Log($"yasir123 No Ingredient found on {other.gameObject.name}");
+        }
+
     }
 
     private void OnTriggerExit(Collider other)

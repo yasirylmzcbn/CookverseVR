@@ -1,27 +1,38 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
+public enum IngredientType
+{
+    Tomato,
+    Potato,
+    Steak,
+}
 public class Ingredient : MonoBehaviour
 {
+    [Header("Ingredient Type")]
+    public IngredientType ingredientType;
+
     [Header("Chop Settings")]
     public int chopsRequired = 3;
 
     [Header("Ingredient States")]
     public GameObject regularMesh;
     public GameObject choppedMesh;
+    public GameObject cookedMesh;
     [SerializeField] private MeshRenderer choppedMeshRenderer;
+    [SerializeField] private MeshRenderer cookedMeshRenderer;
     [SerializeField] private Material rawMaterial;
     [SerializeField] private Material cookedMaterial;
     [SerializeField] private Material burntMaterial;
 
     [Header("XR Interaction (Optional)")]
     [Tooltip("If left empty, will auto-find XRGrabInteractable on this GameObject.")]
-    [SerializeField] private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grabInteractable;
+    [SerializeField] public UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grabInteractable;
 
     [Tooltip("Interaction Layer Mask to apply when chopped (cook-ready).")]
-    [SerializeField] private InteractionLayerMask cookReadyInteractionLayer;
-    [SerializeField] private InteractionLayerMask cookedInteractionLayer;
-    [SerializeField] private InteractionLayerMask burntInteractionLayer;
+    [SerializeField] public InteractionLayerMask cookReadyInteractionLayer;
+    [SerializeField] public InteractionLayerMask cookedInteractionLayer;
+    [SerializeField] public InteractionLayerMask burntInteractionLayer;
 
     [Header("Cooking")]
     [SerializeField] private float cookLevel = 0f;
@@ -45,7 +56,18 @@ public class Ingredient : MonoBehaviour
 
     private void Awake()
     {
-        choppedMesh.GetComponent<MeshRenderer>().enabled = false;
+        if (choppedMeshRenderer == null && choppedMesh != null)
+            choppedMeshRenderer = choppedMesh.GetComponent<MeshRenderer>();
+
+        if (cookedMeshRenderer == null && cookedMesh != null)
+            cookedMeshRenderer = cookedMesh.GetComponent<MeshRenderer>();
+
+        if (choppedMeshRenderer != null)
+            choppedMeshRenderer.enabled = false;
+
+        if (cookedMesh != null)
+            cookedMesh.SetActive(false);
+
         if (grabInteractable == null)
             grabInteractable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
 
@@ -78,6 +100,13 @@ public class Ingredient : MonoBehaviour
         regularMesh.GetComponent<MeshRenderer>().enabled = false;
         choppedMesh.SetActive(true);
         choppedMesh.GetComponent<MeshRenderer>().enabled = true;
+
+        if (cookedMesh != null)
+        {
+            cookedMesh.SetActive(false);
+            cookedMesh.GetComponent<MeshRenderer>().enabled = false;
+        }
+
 
         if (grabInteractable != null)
         {
@@ -116,7 +145,20 @@ public class Ingredient : MonoBehaviour
     private void OnFullyCooked()
     {
         isCooked = true;
-        grabInteractable.interactionLayers = cookedInteractionLayer;
+
+        if (grabInteractable != null)
+            grabInteractable.interactionLayers = cookedInteractionLayer;
+
+        if (cookedMesh != null)
+        {
+            Debug.Log($"yasir123 Swapping to cooked mesh for {gameObject.name}");
+            choppedMesh.SetActive(false);
+            cookedMesh.SetActive(true);
+
+            if (cookedMeshRenderer != null)
+                cookedMeshRenderer.enabled = true;
+        }
+
         SwapMaterial(cookedMaterial);
         Debug.Log($"{gameObject.name} is fully cooked!");
     }
@@ -124,15 +166,22 @@ public class Ingredient : MonoBehaviour
     private void OnBurnt()
     {
         isBurnt = true;
-        grabInteractable.interactionLayers = burntInteractionLayer;
+
+        if (grabInteractable != null)
+            grabInteractable.interactionLayers = burntInteractionLayer;
+
         SwapMaterial(burntMaterial);
         Debug.Log($"{gameObject.name} is burnt!");
     }
 
     private void SwapMaterial(Material mat)
     {
-        if (choppedMeshRenderer == null || mat == null) return;
+        if (mat == null) return;
+
+        var targetRenderer = (cookedMesh != null && isCooked) ? cookedMeshRenderer : choppedMeshRenderer;
+        if (targetRenderer == null) return;
+
         // .material creates a per-instance copy, original asset is untouched
-        choppedMeshRenderer.material = mat;
+        targetRenderer.material = mat;
     }
 }
