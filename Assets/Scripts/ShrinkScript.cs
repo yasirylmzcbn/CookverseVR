@@ -69,7 +69,7 @@ public class ShrinkScript : MonoBehaviour
         btnInteractable.hoverEntered.AddListener((args) => Debug.Log($"[ShrinkScript] Hovering over {button.name}"));
 
         // When the button is pressed/selected in VR, set the scale
-        btnInteractable.selectEntered.AddListener((args) => 
+        btnInteractable.selectEntered.AddListener((args) =>
         {
             Debug.Log($"[ShrinkScript] Button {button.name} pressed. Setting scale to {scaleValue}");
             SetScale(scaleValue);
@@ -83,7 +83,7 @@ public class ShrinkScript : MonoBehaviour
 
     public void ShrinkObject(GameObject target)
     {
-        // Check if the target OR any of its parent objects have the "Pickup" tag
+        // Check if the target OR any of its parent objects have the "Ingredient" tag
         // or a ShelfItemData component. XR Grab Interactables often have colliders on child objects.
         Transform current = target.transform;
         bool shouldShrink = false;
@@ -91,7 +91,7 @@ public class ShrinkScript : MonoBehaviour
 
         while (current != null)
         {
-            if (current.CompareTag("Pickup") || current.GetComponent<ShelfItemData>() != null)
+            if (current.CompareTag("Ingredient") || current.GetComponent<ShelfItemData>() != null)
             {
                 shouldShrink = true;
                 rootToShrink = current;
@@ -107,7 +107,7 @@ public class ShrinkScript : MonoBehaviour
         }
         else
         {
-            Debug.Log($"[ShrinkScript] Ignoring {target.name} because neither it nor its parents have the 'Pickup' tag or a ShelfItemData component.");
+            Debug.Log($"[ShrinkScript] Ignoring {target.name} because neither it nor its parents have the 'Ingredient' tag or a ShelfItemData component.");
         }
     }
 }
