@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.InteractionLayerSettings
   m_LayerNames:
   - Default
-  - 
-  - 
-  - 
+  - RawIngredient
+  - CookReadyIngredient
+  - CookedIngredient
   - Eatable
-  - 
-  - 
+  - BurntIngredient
+  - FrierTray
   - 
   - 
   - 
