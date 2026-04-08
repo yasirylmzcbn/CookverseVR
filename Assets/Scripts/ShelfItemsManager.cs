@@ -290,6 +290,11 @@ public class ShelfItemsManager : MonoBehaviour
 
         GameObject newItem = Instantiate(prefabToSpawn, spawnPosition, spawnRotation);
 
+        if (newItem.GetComponent<ShelfSpawnedItemMarker>() == null)
+        {
+            newItem.AddComponent<ShelfSpawnedItemMarker>();
+        }
+
         // Ensure the spawned item has the correct ItemType set
         ShelfItemData itemData = newItem.GetComponent<ShelfItemData>();
         if (itemData != null)

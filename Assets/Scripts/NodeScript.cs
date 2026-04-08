@@ -225,18 +225,39 @@ public class NodeScript : MonoBehaviour
 
     // Find path from player position to the closest item of a specific type
     // Returns both the path and the target item
-    public static (List<NodeScript> path, GameObject targetItem) FindPathToClosestItemWithTarget(Vector3 playerPosition, ItemType targetItemType)
+    public static (List<NodeScript> path, GameObject targetItem) FindPathToClosestItemWithTarget(Vector3 playerPosition, ItemType targetItemType, Transform searchRoot = null)
     {
+        NodeScript startNode = GetClosestNodeToPosition(playerPosition);
+        if (startNode == null)
+        {
+            Debug.LogWarning("NodeScript: Could not find a start node near the player!");
+            return (new List<NodeScript>(), null);
+        }
+
         // Find all items of the target type
         ShelfItemData[] allItems = FindObjectsOfType<ShelfItemData>();
         List<GameObject> targetItems = new List<GameObject>();
 
         foreach (ShelfItemData item in allItems)
         {
-            if (item.itemType == targetItemType)
+            if (item.itemType != targetItemType)
             {
-                targetItems.Add(item.gameObject);
+                continue;
             }
+
+            // Optional filter: include either hierarchy children or items spawned by shelf manager.
+            if (searchRoot != null)
+            {
+                bool underSearchRoot = item.transform.IsChildOf(searchRoot);
+                bool spawnedByShelfManager = item.GetComponent<ShelfSpawnedItemMarker>() != null;
+
+                if (!underSearchRoot && !spawnedByShelfManager)
+                {
+                    continue;
+                }
+            }
+
+            targetItems.Add(item.gameObject);
         }
 
         Debug.Log($"NodeScript: FindPathToClosestItemWithTarget - Looking for {targetItemType}, found {targetItems.Count} items of that type out of {allItems.Length} total items");
@@ -247,48 +268,38 @@ public class NodeScript : MonoBehaviour
             return (new List<NodeScript>(), null);
         }
 
-        // Find closest target item to player
-        GameObject closestItem = null;
-        float closestItemDistance = float.MaxValue;
+        // Prefer the nearest item that actually has a valid path from the player's current node.
+        targetItems.Sort((a, b) =>
+            Vector3.Distance(playerPosition, a.transform.position)
+            .CompareTo(Vector3.Distance(playerPosition, b.transform.position))
+        );
 
         foreach (GameObject item in targetItems)
         {
-            float distance = Vector3.Distance(playerPosition, item.transform.position);
-            if (distance < closestItemDistance)
+            NodeScript endNode = GetClosestNodeToPosition(item.transform.position);
+            if (endNode == null)
             {
-                closestItemDistance = distance;
-                closestItem = item;
+                continue;
+            }
+
+            List<NodeScript> path = FindShortestUnweightedPath(startNode, endNode);
+            if (path != null && path.Count > 0)
+            {
+                float itemDistance = Vector3.Distance(playerPosition, item.transform.position);
+                ShelfItemData itemData = item.GetComponent<ShelfItemData>();
+                Debug.Log($"NodeScript: Selected reachable {targetItemType} item {item.name} ({itemData?.itemType}) at distance {itemDistance}");
+                return (path, item);
             }
         }
 
-        if (closestItem == null)
-        {
-            return (new List<NodeScript>(), null);
-        }
-
-        ShelfItemData closestData = closestItem.GetComponent<ShelfItemData>();
-        Debug.Log($"NodeScript: Closest {targetItemType} item is {closestData?.itemType} at {closestItem.name} (distance: {closestItemDistance})");
-
-        // Find closest node to player and closest node to target item
-        NodeScript startNode = GetClosestNodeToPosition(playerPosition);
-        NodeScript endNode = GetClosestNodeToPosition(closestItem.transform.position);
-
-        if (startNode == null || endNode == null)
-        {
-            Debug.LogWarning("NodeScript: Could not find start or end node!");
-            return (new List<NodeScript>(), closestItem);
-        }
-
-        Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for item type {targetItemType}");
-
-        // Find the shortest path
-        return (FindShortestUnweightedPath(startNode, endNode), closestItem);
+        Debug.LogWarning($"NodeScript: No reachable path found to any item of type {targetItemType}");
+        return (new List<NodeScript>(), null);
     }
 
     // Keep the old method for backward compatibility
-    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType)
+    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType, Transform searchRoot = null)
     {
-        var result = FindPathToClosestItemWithTarget(playerPosition, targetItemType);
+        var result = FindPathToClosestItemWithTarget(playerPosition, targetItemType, searchRoot);
         return result.path;
     }
 

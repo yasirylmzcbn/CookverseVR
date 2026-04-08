@@ -6,6 +6,7 @@ public static class NavigationPathVisualizer
 {
     // Battery blue shade as fallback color - RGB(0, 133, 255) with alpha 0.84
     private static Color batteryBlueColor = new Color(0f, 133f / 255f, 1f, 0.84f);
+    private static Color targetGreenColor = new Color(0.1f, 0.95f, 0.35f, 0.84f);
     private static Color pathColor = new Color(0f, 133f / 255f, 1f, 0.84f);
     private static float pathLineWidth = 0.02f; // Much thinner line
 
@@ -51,13 +52,7 @@ public static class NavigationPathVisualizer
             pathColor = batteryBlueColor;
         }
 
-        // Set gradient
-        Gradient gradient = new Gradient();
-        gradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(pathColor, 0.0f), new GradientColorKey(pathColor, 1.0f) },
-            new GradientAlphaKey[] { new GradientAlphaKey(pathColor.a, 0.0f), new GradientAlphaKey(pathColor.a, 1.0f) }
-        );
-        pathLineRenderer.colorGradient = gradient;
+        ApplyPathColor(pathColor);
 
         pathLineRenderer.enabled = false;
     }
@@ -127,18 +122,14 @@ public static class NavigationPathVisualizer
     public static void SetPathColor(Color newColor)
     {
         pathColor = newColor;
-        
-        if (pathLineRenderer != null && pathLineRenderer.material != null)
-        {
-            pathLineRenderer.material.color = newColor;
+        ApplyPathColor(pathColor);
+    }
 
-            Gradient gradient = new Gradient();
-            gradient.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(pathColor, 0.0f), new GradientColorKey(pathColor, 1.0f) },
-                new GradientAlphaKey[] { new GradientAlphaKey(pathColor.a, 0.0f), new GradientAlphaKey(pathColor.a, 1.0f) }
-            );
-            pathLineRenderer.colorGradient = gradient;
-        }
+    // Blends from blue (far) to green (close).
+    public static void SetPathProgress01(float progress)
+    {
+        float t = Mathf.Clamp01(progress);
+        SetPathColor(Color.Lerp(batteryBlueColor, targetGreenColor, t));
     }
 
     // Update the line width
@@ -164,5 +155,22 @@ public static class NavigationPathVisualizer
         }
         
         currentTargetItem = null;
+    }
+
+    private static void ApplyPathColor(Color color)
+    {
+        if (pathLineRenderer == null || pathLineRenderer.material == null)
+        {
+            return;
+        }
+
+        pathLineRenderer.material.color = color;
+
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(color, 0.0f), new GradientColorKey(color, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(color.a, 0.0f), new GradientAlphaKey(color.a, 1.0f) }
+        );
+        pathLineRenderer.colorGradient = gradient;
     }
 }
