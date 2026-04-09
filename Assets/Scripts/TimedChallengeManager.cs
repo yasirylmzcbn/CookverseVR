@@ -47,6 +47,13 @@ public class TimedChallengeManager : MonoBehaviour
     [Tooltip("Minimum distance player must move before updating path")]
     public float pathUpdateDistanceThreshold = 1f;
 
+    [Header("Proximity Haptics")]
+    [Tooltip("Maximum distance to start feeling haptic vibrations")]
+    public float hapticMaxDistance = 5f;
+    [Tooltip("How frequently (in seconds) to pulse the haptic feedback based on proximity")]
+    public float hapticPulseInterval = 0.2f;
+    private float lastHapticTime;
+
     private float timer;
     private bool challengeActive;
     private int roundsWon;
@@ -108,6 +115,8 @@ public class TimedChallengeManager : MonoBehaviour
         {
             UpdatePathIfNeeded();
         }
+
+        UpdateHaptics();
     }
 
     // Check if we should update the path based on time and distance thresholds
@@ -128,6 +137,49 @@ public class TimedChallengeManager : MonoBehaviour
             ShowPathToTarget();
             lastPathUpdateTime = Time.time;
             lastPlayerPosition = actualPlayerTransform.position;
+        }
+    }
+
+    private void UpdateHaptics()
+    {
+        if (!challengeActive || cachedTargetItem == null) return;
+
+        Transform actualPlayerTransform = Camera.main != null ? Camera.main.transform : playerTransform;
+        if (actualPlayerTransform == null) return;
+
+        if (Time.time - lastHapticTime >= hapticPulseInterval)
+        {
+            float distanceToTarget = Vector3.Distance(actualPlayerTransform.position, cachedTargetItem.transform.position);
+            
+            if (distanceToTarget <= hapticMaxDistance)
+            {
+                // Calculate intensity: 0 at max distance, 1 when very close
+                float intensity = 1f - (distanceToTarget / hapticMaxDistance);
+                // Ramp intensity more linearly without minimum clipping to allow soft fade in
+                intensity = Mathf.Max(0.01f, intensity); 
+
+                Vector3 directionToTarget = (cachedTargetItem.transform.position - actualPlayerTransform.position).normalized;
+                float dotRight = Vector3.Dot(actualPlayerTransform.right, directionToTarget);
+
+                if (clipPlayer != null)
+                {
+                    clipPlayer.amplitude = intensity;
+                    
+                    if (dotRight < -0.1f)
+                    {
+                        clipPlayer.Play(Controller.Left);
+                    }
+                    else if (dotRight > 0.1f)
+                    {
+                        clipPlayer.Play(Controller.Right);
+                    }
+                    else
+                    {
+                        clipPlayer.Play(Controller.Both);
+                    }
+                }
+            }
+            lastHapticTime = Time.time;
         }
     }
 
@@ -317,7 +369,11 @@ public class TimedChallengeManager : MonoBehaviour
         NodeScript.SetAllNodesVisible(false);
 
         audioSource.PlayOneShot(winSound);
-        clipPlayer.Play(Controller.Both);
+        if (clipPlayer != null)
+        {
+            clipPlayer.amplitude = 1f;
+            clipPlayer.Play(Controller.Both);
+        }
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
