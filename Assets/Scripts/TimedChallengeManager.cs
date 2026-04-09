@@ -15,6 +15,13 @@ public class TimedChallengeManager : MonoBehaviour
     [SerializeField] public TextMeshProUGUI timerText;
     [SerializeField] public TextMeshProUGUI targetText;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip startSound;
+    [SerializeField] private AudioClip correctSound;
+    [SerializeField] private AudioClip winSound;
+    [SerializeField] private AudioClip failSound;
+
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
     public IngredientDistributionManager ingredientDistribution;

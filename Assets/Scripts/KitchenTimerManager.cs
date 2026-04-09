@@ -19,6 +19,12 @@ public class KitchenTimerManager : MonoBehaviour
     [SerializeField] public HapticClip hapticClip;
     private HapticClipPlayer clipPlayer;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip startSound;
+    [SerializeField] private AudioClip winSound;
+    [SerializeField] private AudioClip failSound;
+
     private float timer;
     private bool challengeActive;
     private int zonesCompleted;
@@ -27,6 +33,9 @@ public class KitchenTimerManager : MonoBehaviour
     {
         zones = FindObjectsOfType<ItemDropZone>();
         clipPlayer = new HapticClipPlayer(hapticClip);
+
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
     }
 
     private void Awake()
@@ -65,6 +74,9 @@ public class KitchenTimerManager : MonoBehaviour
         zonesCompleted = 0;
 
         Debug.Log("Challenge Started");
+
+        // play start sound
+        audioSource.PlayOneShot(startSound);
 
         // Show UI
         if (timerText != null)
@@ -111,6 +123,7 @@ public class KitchenTimerManager : MonoBehaviour
 
         if (instructionText != null)
             instructionText.text = "SUCCESS!";
+        audioSource.PlayOneShot(winSound);
 
         Debug.Log("SUCCESS");
         clipPlayer.Play(Controller.Both);
@@ -125,6 +138,7 @@ public class KitchenTimerManager : MonoBehaviour
 
         if (instructionText != null)
             instructionText.text = "FAILED!";
+        audioSource.PlayOneShot(failSound);
 
         Debug.Log("FAILED");
 
