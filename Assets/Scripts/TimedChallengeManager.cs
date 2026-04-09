@@ -162,9 +162,33 @@ public class TimedChallengeManager : MonoBehaviour
     // For each round in the challenge, if the player grabs the right item, activates win condition/next round
     private void PickNewTarget()
     {
-        currentTarget = (ItemType)Random.Range(
-            0, System.Enum.GetValues(typeof(ItemType)).Length
-        );
+        // Build a list of valid targets based ONLY on what is actually assigned to the shelves
+        List<ItemType> validTargets = new List<ItemType>();
+        if (shelfManager != null && shelfManager.shelfItemPrefabs != null)
+        {
+            foreach (GameObject prefab in shelfManager.shelfItemPrefabs)
+            {
+                if (prefab != null)
+                {
+                    ShelfItemData itemData = prefab.GetComponent<ShelfItemData>();
+                    if (itemData != null && !validTargets.Contains(itemData.itemType))
+                    {
+                        validTargets.Add(itemData.itemType);
+                    }
+                }
+            }
+        }
+
+        // Fallback securely just in case there are no prefabs
+        if (validTargets.Count == 0)
+        {
+            Debug.LogWarning("TimedChallengeManager: No valid targets found in ShelfItemsManager. Falling back to random enum.");
+            var allTypes = (ItemType[])System.Enum.GetValues(typeof(ItemType));
+            validTargets = new List<ItemType>(allTypes);
+        }
+
+        // Pick a random target from the currently available valid list
+        currentTarget = validTargets[Random.Range(0, validTargets.Count)];
 
         targetText.text =
             "Round " + (roundsWon + 1) + "/" + roundsRequired +
