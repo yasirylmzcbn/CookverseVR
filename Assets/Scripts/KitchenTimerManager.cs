@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using Oculus.Haptics;
 
 public class KitchenTimerManager : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class KitchenTimerManager : MonoBehaviour
     [SerializeField] public TextMeshProUGUI timerText;
     [SerializeField] public TextMeshProUGUI instructionText;
 
+    [Header("Haptics")]
+    [SerializeField] public HapticClip hapticClip;
+    private HapticClipPlayer clipPlayer;
+
     private float timer;
     private bool challengeActive;
     private int zonesCompleted;
@@ -21,6 +26,7 @@ public class KitchenTimerManager : MonoBehaviour
     private void Start()
     {
         zones = FindObjectsOfType<ItemDropZone>();
+        clipPlayer = new HapticClipPlayer(hapticClip);
     }
 
     private void Awake()
@@ -50,8 +56,6 @@ public class KitchenTimerManager : MonoBehaviour
             return;
         }
     }
-
-    // Start challenge (called by VR button)
     public void StartChallenge()
     {
         if (challengeActive) return;
@@ -109,6 +113,7 @@ public class KitchenTimerManager : MonoBehaviour
             instructionText.text = "SUCCESS!";
 
         Debug.Log("SUCCESS");
+        clipPlayer.Play(Controller.Both);
 
         Invoke(nameof(HideUI), 2f);
     }
@@ -134,5 +139,10 @@ public class KitchenTimerManager : MonoBehaviour
 
         if (instructionText != null)
             instructionText.gameObject.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        clipPlayer?.Dispose();
     }
 }
