@@ -46,7 +46,7 @@ public class ShelfItemsManager : MonoBehaviour
 
     #region Private Fields
 
-    private List<GameObject> spawnedItems = new List<GameObject>();
+    public List<GameObject> spawnedItems = new List<GameObject>();
     private Dictionary<Transform, ItemType> shelfToIngredientMap = new Dictionary<Transform, ItemType>();
 
     #endregion

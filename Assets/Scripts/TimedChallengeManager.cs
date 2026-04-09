@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
-using Oculus.Haptics;
+using UnityEngine.XR;
 
 public class TimedChallengeManager : MonoBehaviour
 {
@@ -23,12 +23,10 @@ public class TimedChallengeManager : MonoBehaviour
     [SerializeField] private AudioClip wrongSound;
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
-    [SerializeField] private HapticClip hapticClip;
+    [SerializeField] private AudioClip clockTickSound;
 
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private Color normalColor = Color.white;
-
-    private HapticClipPlayer clipPlayer;
 
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
@@ -47,6 +45,13 @@ public class TimedChallengeManager : MonoBehaviour
     [Tooltip("Minimum distance player must move before updating path")]
     public float pathUpdateDistanceThreshold = 1f;
 
+    [Header("Proximity Haptics")]
+    [Tooltip("Maximum distance to start feeling haptic vibrations")]
+    public float hapticMaxDistance = 5f;
+    [Tooltip("How frequently (in seconds) to pulse the haptic feedback based on proximity")]
+    public float hapticPulseInterval = 0.2f;
+    private float lastHapticTime;
+
     private float timer;
     private bool challengeActive;
     private int roundsWon;
@@ -55,10 +60,14 @@ public class TimedChallengeManager : MonoBehaviour
 
     private float lastPathUpdateTime;
     private Vector3 lastPlayerPosition;
+    private float tickAccumulator = 0f;
+
+    // Track items that the challenge has already directed the user to
+    private HashSet<GameObject> usedTargetItems = new HashSet<GameObject>();
 
     private void Start()
     {
-        clipPlayer = new HapticClipPlayer(hapticClip);
+        // No longer using Oculus HapticClipPlayer
     }
 
     private void Awake()
@@ -95,6 +104,8 @@ public class TimedChallengeManager : MonoBehaviour
             }
         }
 
+        UpdateClockTick();
+
         if (timer <= 0f)
         {
             ChallengeFailed();
@@ -105,22 +116,106 @@ public class TimedChallengeManager : MonoBehaviour
         {
             UpdatePathIfNeeded();
         }
+
+        UpdateHaptics();
+    }
+
+    private void UpdateClockTick()
+    {
+        if (clockTickSound == null || audioSource == null || timer <= 0f) return;
+
+        float tickInterval;
+        if (timer <= 2f) tickInterval = 1f / 8f;
+        else if (timer <= 5f) tickInterval = 1f / 4f;
+        else if (timer <= 10f) tickInterval = 1f / 2f;
+        else tickInterval = 1f;
+
+        tickAccumulator += Time.deltaTime;
+        if (tickAccumulator >= tickInterval)
+        {
+            tickAccumulator -= tickInterval;
+            
+            // Adjust pitch slightly to make faster ticks feel more urgent, or just play normally
+            audioSource.PlayOneShot(clockTickSound);
+        }
     }
 
     // Check if we should update the path based on time and distance thresholds
     private void UpdatePathIfNeeded()
     {
-        if (playerTransform == null) return;
+        // Force use of the user's actual Headset/Camera position. 
+        // If 'playerTransform' was set to the XR Origin root, it might not move when physically walking in room-scale VR!
+        Transform actualPlayerTransform = Camera.main != null ? Camera.main.transform : playerTransform;
+
+        if (actualPlayerTransform == null) return;
 
         float timeSinceLastUpdate = Time.time - lastPathUpdateTime;
-        float distanceMoved = Vector3.Distance(playerTransform.position, lastPlayerPosition);
+        float distanceMoved = Vector3.Distance(actualPlayerTransform.position, lastPlayerPosition);
 
         // Update path if enough time has passed OR player moved significantly
         if (timeSinceLastUpdate >= pathUpdateInterval || distanceMoved >= pathUpdateDistanceThreshold)
         {
             ShowPathToTarget();
             lastPathUpdateTime = Time.time;
-            lastPlayerPosition = playerTransform.position;
+            lastPlayerPosition = actualPlayerTransform.position;
+        }
+    }
+
+    private void UpdateHaptics()
+    {
+        if (!challengeActive || cachedTargetItem == null) return;
+
+        Transform actualPlayerTransform = Camera.main != null ? Camera.main.transform : playerTransform;
+        if (actualPlayerTransform == null) return;
+
+        if (Time.time - lastHapticTime >= hapticPulseInterval)
+        {
+            float distanceToTarget = Vector3.Distance(actualPlayerTransform.position, cachedTargetItem.transform.position);
+            
+            if (distanceToTarget <= hapticMaxDistance)
+            {
+                // Calculate intensity: 0 at max distance, 1 when very close
+                float intensity = 1f - (distanceToTarget / hapticMaxDistance);
+                // Ramp intensity more linearly without minimum clipping to allow soft fade in
+                intensity = Mathf.Max(0.01f, intensity); 
+
+                Vector3 directionToTarget = (cachedTargetItem.transform.position - actualPlayerTransform.position).normalized;
+                float dotRight = Vector3.Dot(actualPlayerTransform.right, directionToTarget);
+
+                SetControllerHaptic(dotRight, intensity, hapticPulseInterval);
+            }
+            lastHapticTime = Time.time;
+        }
+    }
+
+    private void SetControllerHaptic(float dotRight, float intensity, float duration)
+    {
+        List<InputDevice> leftDevices = new List<InputDevice>();
+        List<InputDevice> rightDevices = new List<InputDevice>();
+        
+        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Left | InputDeviceCharacteristics.Controller, leftDevices);
+        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Right | InputDeviceCharacteristics.Controller, rightDevices);
+
+        if (dotRight < -0.1f) // Target is to the left
+        {
+            foreach (var leftDevice in leftDevices)
+                if (leftDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    leftDevice.SendHapticImpulse(0u, intensity, duration);
+        }
+        else if (dotRight > 0.1f) // Target is to the right
+        {
+            foreach (var rightDevice in rightDevices)
+                if (rightDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    rightDevice.SendHapticImpulse(0u, intensity, duration);
+        }
+        else // Center
+        {
+            foreach (var leftDevice in leftDevices)
+                if (leftDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    leftDevice.SendHapticImpulse(0u, intensity, duration);
+            foreach (var rightDevice in rightDevices)
+                if (rightDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    rightDevice.SendHapticImpulse(0u, intensity, duration);
         }
     }
 
@@ -132,6 +227,8 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = true;
         timer = challengeDuration;
         roundsWon = 0;
+        tickAccumulator = 0f;
+        usedTargetItems.Clear(); // Reset used items whenever a new challenge starts
         audioSource.PlayOneShot(startSound);
 
         // Show navigation nodes
@@ -162,9 +259,33 @@ public class TimedChallengeManager : MonoBehaviour
     // For each round in the challenge, if the player grabs the right item, activates win condition/next round
     private void PickNewTarget()
     {
-        currentTarget = (ItemType)Random.Range(
-            0, System.Enum.GetValues(typeof(ItemType)).Length
-        );
+        // Build a list of valid targets based ONLY on what is actually assigned to the shelves
+        List<ItemType> validTargets = new List<ItemType>();
+        if (shelfManager != null && shelfManager.shelfItemPrefabs != null)
+        {
+            foreach (GameObject prefab in shelfManager.shelfItemPrefabs)
+            {
+                if (prefab != null)
+                {
+                    ShelfItemData itemData = prefab.GetComponent<ShelfItemData>();
+                    if (itemData != null && !validTargets.Contains(itemData.itemType))
+                    {
+                        validTargets.Add(itemData.itemType);
+                    }
+                }
+            }
+        }
+
+        // Fallback securely just in case there are no prefabs
+        if (validTargets.Count == 0)
+        {
+            Debug.LogWarning("TimedChallengeManager: No valid targets found in ShelfItemsManager. Falling back to random enum.");
+            var allTypes = (ItemType[])System.Enum.GetValues(typeof(ItemType));
+            validTargets = new List<ItemType>(allTypes);
+        }
+
+        // Pick a random target from the currently available valid list
+        currentTarget = validTargets[Random.Range(0, validTargets.Count)];
 
         targetText.text =
             "Round " + (roundsWon + 1) + "/" + roundsRequired +
@@ -175,9 +296,10 @@ public class TimedChallengeManager : MonoBehaviour
 
         // Reset path update tracking
         lastPathUpdateTime = 0f;
-        if (playerTransform != null)
+        Transform actualPlayerTransform = Camera.main != null ? Camera.main.transform : playerTransform;
+        if (actualPlayerTransform != null)
         {
-            lastPlayerPosition = playerTransform.position;
+            lastPlayerPosition = actualPlayerTransform.position;
         }
 
         // Show initial path to the target item
@@ -189,7 +311,9 @@ public class TimedChallengeManager : MonoBehaviour
 
     private void ShowPathToTarget()
     {
-        if (playerTransform == null)
+        Transform actualPlayerTransform = Camera.main != null ? Camera.main.transform : playerTransform;
+
+        if (actualPlayerTransform == null)
         {
             Debug.LogWarning("TimedChallengeManager: Player transform not assigned!");
             return;
@@ -198,11 +322,17 @@ public class TimedChallengeManager : MonoBehaviour
         // If we don't have a cached target item yet, find the closest one
         if (cachedTargetItem == null)
         {
-            var result = NodeScript.FindPathToClosestItemWithTarget(playerTransform.position, currentTarget);
+            // Use the explicit list of spawned items dynamically generated by the shelf manager so it NEVER targets permanent kitchen decor
+            List<GameObject> validPool = shelfManager != null ? shelfManager.spawnedItems : null;
+
+            var result = NodeScript.FindPathToClosestItemWithTarget(actualPlayerTransform.position, currentTarget, validPool, usedTargetItems);
             cachedTargetItem = result.targetItem;
 
             if (cachedTargetItem != null)
             {
+                // Register this specific physical GameObject as "used" so it doesn't get picked again
+                usedTargetItems.Add(cachedTargetItem);
+
                 ShelfItemData targetData = cachedTargetItem.GetComponent<ShelfItemData>();
                 Debug.Log($"TimedChallengeManager: Target item cached - Looking for {currentTarget}, found {targetData?.itemType} at {cachedTargetItem.name}");
             }
@@ -213,7 +343,20 @@ public class TimedChallengeManager : MonoBehaviour
         }
 
         // Use cached target item for consistent path throughout the round
-        List<NodeScript> path = NodeScript.FindPathToSpecificItem(playerTransform.position, cachedTargetItem);
+        List<NodeScript> path = NodeScript.FindPathToSpecificItem(actualPlayerTransform.position, cachedTargetItem);
+
+        // Update the physical nodes so ONLY the active route based on the player's location is visible!
+        NodeScript.SetAllNodesVisible(false);
+        if (path != null)
+        {
+            foreach (NodeScript node in path)
+            {
+                if (node != null)
+                {
+                    node.SetNodeVisibility(true);
+                }
+            }
+        }
 
         // Show the path with line to target item
         NavigationPathVisualizer.ShowPath(path, cachedTargetItem);
@@ -263,7 +406,9 @@ public class TimedChallengeManager : MonoBehaviour
         NodeScript.SetAllNodesVisible(false);
 
         audioSource.PlayOneShot(winSound);
-        clipPlayer.Play(Controller.Both);
+        
+        // Play final success vibration
+        SetControllerHaptic(0f, 1f, 1f);
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);
