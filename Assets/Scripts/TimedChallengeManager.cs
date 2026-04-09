@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using Oculus.Haptics;
 
 public class TimedChallengeManager : MonoBehaviour
 {
@@ -15,16 +16,19 @@ public class TimedChallengeManager : MonoBehaviour
     [SerializeField] public TextMeshProUGUI timerText;
     [SerializeField] public TextMeshProUGUI targetText;
 
-    [Header("Audio")]
+    [Header("Haptics & Audio")]
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip startSound;
     [SerializeField] private AudioClip correctSound;
     [SerializeField] private AudioClip wrongSound;
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
+    [SerializeField] private HapticClip hapticClip;
 
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private Color normalColor = Color.white;
+
+    private HapticClipPlayer clipPlayer;
 
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
@@ -51,6 +55,11 @@ public class TimedChallengeManager : MonoBehaviour
 
     private float lastPathUpdateTime;
     private Vector3 lastPlayerPosition;
+
+    private void Start()
+    {
+        clipPlayer = new HapticClipPlayer(hapticClip);
+    }
 
     private void Awake()
     {
@@ -248,11 +257,13 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = false;
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
-        audioSource.PlayOneShot(winSound);
 
         // Hide path and nodes
         NavigationPathVisualizer.HidePath();
         NodeScript.SetAllNodesVisible(false);
+
+        audioSource.PlayOneShot(winSound);
+        clipPlayer.Play(Controller.Both);
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);

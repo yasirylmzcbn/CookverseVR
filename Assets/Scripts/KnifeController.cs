@@ -60,7 +60,7 @@ public class KnifeController : MonoBehaviour
         foreach (Collider hit in hits)
         {
             Ingredient ingredient = hit.GetComponentInParent<Ingredient>();
-            if (ingredient != null)
+            if (ingredient != null && !ingredient.isChopped)
             {
                 ingredient.RegisterChop();
                 SendChopHaptics(ingredient);
@@ -80,12 +80,28 @@ public class KnifeController : MonoBehaviour
     public static void SendHapticToGrabbable(UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grabbable, float amplitude, float duration)
     {
         Debug.Log($"yasir123 Sending haptic to {grabbable.gameObject.name} with amplitude {amplitude} and duration {duration}");
+        Debug.Log("yasir123 interactorsSelecting count: " + grabbable.interactorsSelecting.Count);
+        amplitude = Mathf.Clamp01(amplitude);
+        duration = Mathf.Max(0f, duration);
+
         foreach (var interactor in grabbable.interactorsSelecting)
         {
-            if (interactor is UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInputInteractor controllerInteractor)
+            Debug.Log($"yasir123 Interactor {interactor} is selecting {grabbable.gameObject.name}");
+            if (interactor is UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInputInteractor inputInteractor)
             {
-                Debug.Log($"yasir123 Sending haptic to interactor {interactor}");
-                controllerInteractor.xrController.SendHapticImpulse(amplitude, duration);
+                bool sent = inputInteractor.SendHapticImpulse(amplitude, duration);
+                Debug.Log($"yasir123 Sent haptic via interactor {interactor}: {sent}");
+                continue;
+            }
+
+            if (interactor is Component interactorComponent)
+            {
+                var hapticPlayer = interactorComponent.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics.HapticImpulsePlayer>(true);
+                if (hapticPlayer != null)
+                {
+                    bool sent = hapticPlayer.SendHapticImpulse(amplitude, duration);
+                    Debug.Log($"yasir123 Sent haptic via HapticImpulsePlayer on {hapticPlayer.gameObject.name}: {sent}");
+                }
             }
         }
     }

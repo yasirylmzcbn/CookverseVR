@@ -15,15 +15,13 @@ public class KitchenTimerManager : MonoBehaviour
     [SerializeField] public TextMeshProUGUI timerText;
     [SerializeField] public TextMeshProUGUI instructionText;
 
-    [Header("Haptics")]
-    [SerializeField] public HapticClip hapticClip;
-    private HapticClipPlayer clipPlayer;
-
-    [Header("Audio")]
+    [Header("Haptics & Audio")]
+    [SerializeField] private HapticClip hapticClip;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip startSound;
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
+    private HapticClipPlayer clipPlayer;
 
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private Color normalColor = Color.white;
@@ -140,6 +138,7 @@ public class KitchenTimerManager : MonoBehaviour
         audioSource.PlayOneShot(winSound);
 
         Debug.Log("SUCCESS");
+        audioSource.PlayOneShot(winSound);
         clipPlayer.Play(Controller.Both);
 
         Invoke(nameof(HideUI), 2f);
