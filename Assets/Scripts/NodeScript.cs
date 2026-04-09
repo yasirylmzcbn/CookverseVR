@@ -17,6 +17,7 @@ public class NodeScript : MonoBehaviour
     public bool showConnections = true;
 
     private static List<NodeScript> allNodes = new List<NodeScript>();
+    private Renderer[] cachedRenderers;
 
     private void Awake()
     {
@@ -24,6 +25,8 @@ public class NodeScript : MonoBehaviour
         {
             allNodes.Add(this);
         }
+        // Cache renderers for performance
+        cachedRenderers = GetComponentsInChildren<Renderer>(true);
     }
 
     private void OnDestroy()
@@ -38,13 +41,20 @@ public class NodeScript : MonoBehaviour
         SetNodeVisibility(false);
     }
 
-    private void SetNodeVisibility(bool visible)
+    public void SetNodeVisibility(bool visible)
     {
         // Hide/show all renderers on this node
-        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-        foreach (Renderer renderer in renderers)
+        if (cachedRenderers == null)
         {
-            renderer.enabled = visible;
+            cachedRenderers = GetComponentsInChildren<Renderer>(true);
+        }
+        
+        foreach (Renderer renderer in cachedRenderers)
+        {
+            if (renderer != null)
+            {
+                renderer.enabled = visible;
+            }
         }
     }
 
@@ -119,15 +129,18 @@ public class NodeScript : MonoBehaviour
     // Find all nodes in the scene
     public static List<NodeScript> FindAllNodes()
     {
-        return FindObjectsOfType<NodeScript>().ToList();
+        // Clean up any destroyed nodes first, then return the static list 
+        // to prevent extreme lag from FindObjectsOfType every 0.5s
+        allNodes.RemoveAll(n => n == null);
+        return allNodes;
     }
 
-    // Get the closest node to a specific position
+    // Get the closest node to a specific position (flattened Y check to avoid ceiling/floor confusion)
     public static NodeScript GetClosestNodeToPosition(Vector3 position)
     {
-        List<NodeScript> allNodes = FindAllNodes();
+        List<NodeScript> nodes = FindAllNodes();
         
-        if (allNodes.Count == 0)
+        if (nodes.Count == 0)
         {
             Debug.LogWarning("NodeScript: No nodes found in the scene!");
             return null;
@@ -136,11 +149,14 @@ public class NodeScript : MonoBehaviour
         NodeScript closest = null;
         float closestDistance = float.MaxValue;
 
-        foreach (NodeScript node in allNodes)
+        foreach (NodeScript node in nodes)
         {
             if (node == null) continue;
 
-            float distance = Vector3.Distance(position, node.transform.position);
+            Vector3 nodePos = node.transform.position;
+            nodePos.y = position.y; // Flatten Y to only care about X/Z distance
+            float distance = Vector3.Distance(position, nodePos);
+            
             if (distance < closestDistance)
             {
                 closestDistance = distance;
@@ -225,70 +241,117 @@ public class NodeScript : MonoBehaviour
 
     // Find path from player position to the closest item of a specific type
     // Returns both the path and the target item
-    public static (List<NodeScript> path, GameObject targetItem) FindPathToClosestItemWithTarget(Vector3 playerPosition, ItemType targetItemType)
+    public static (List<NodeScript> path, GameObject targetItem) FindPathToClosestItemWithTarget(Vector3 playerPosition, ItemType targetItemType, List<GameObject> validItemPool = null, HashSet<GameObject> excludedItems = null)
     {
+        // Find all nodes sorted by distance horizontally so height differences don't mess up closest node selection
+        List<NodeScript> allNodesDistSorted = FindAllNodes();
+        allNodesDistSorted.Sort((a, b) => 
+        {
+            Vector3 aPos = a.transform.position; aPos.y = playerPosition.y;
+            Vector3 bPos = b.transform.position; bPos.y = playerPosition.y;
+            return Vector3.Distance(playerPosition, aPos).CompareTo(Vector3.Distance(playerPosition, bPos));
+        });
+
+        if (allNodesDistSorted.Count == 0)
+        {
+            Debug.LogWarning("NodeScript: Could not find a start node near the player!");
+            return (new List<NodeScript>(), null);
+        }
+
+        // Try the absolute closest node first
+        NodeScript startNode = allNodesDistSorted[0];
+
         // Find all items of the target type
         ShelfItemData[] allItems = FindObjectsOfType<ShelfItemData>();
         List<GameObject> targetItems = new List<GameObject>();
 
         foreach (ShelfItemData item in allItems)
         {
-            if (item.itemType == targetItemType)
+            if (item.itemType != targetItemType)
             {
-                targetItems.Add(item.gameObject);
+                continue;
             }
+
+            // Optional filter: explicitly verify the item belongs to the safely spawned list
+            if (validItemPool != null)
+            {
+                if (!validItemPool.Contains(item.gameObject))
+                {
+                    continue;
+                }
+            }
+
+            // Exclude already highlighted items
+            if (excludedItems != null && excludedItems.Contains(item.gameObject))
+            {
+                continue;
+            }
+
+            targetItems.Add(item.gameObject);
         }
 
-        Debug.Log($"NodeScript: FindPathToClosestItemWithTarget - Looking for {targetItemType}, found {targetItems.Count} items of that type out of {allItems.Length} total items");
+        Debug.Log($"NodeScript: FindPathToClosestItemWithTarget - Looking for {targetItemType} dynamically, found {targetItems.Count} valid new items.");
 
         if (targetItems.Count == 0)
         {
-            Debug.LogWarning($"NodeScript: No items of type {targetItemType} found in the scene!");
+            Debug.LogWarning($"NodeScript: No new items of type {targetItemType} found! Retrying without exclusions...");
+            // If we ran out, bypass exclusions
+            if (excludedItems != null && excludedItems.Count > 0)
+            {
+                return FindPathToClosestItemWithTarget(playerPosition, targetItemType, validItemPool, null);
+            }
             return (new List<NodeScript>(), null);
         }
 
-        // Find closest target item to player
-        GameObject closestItem = null;
-        float closestItemDistance = float.MaxValue;
+        // Prefer the nearest item strictly based on horizontal distance to player, completely ignoring nodes to start with
+        targetItems.Sort((a, b) =>
+        {
+            Vector3 aPos = a.transform.position; aPos.y = playerPosition.y;
+            Vector3 bPos = b.transform.position; bPos.y = playerPosition.y;
+            return Vector3.Distance(playerPosition, aPos).CompareTo(Vector3.Distance(playerPosition, bPos));
+        });
 
         foreach (GameObject item in targetItems)
         {
-            float distance = Vector3.Distance(playerPosition, item.transform.position);
-            if (distance < closestItemDistance)
+            // Get the node closest to the specific item
+            NodeScript endNode = GetClosestNodeToPosition(item.transform.position);
+            if (endNode == null) continue;
+
+            // Find shortest path from the player's physically closest node to the item's closest node
+            List<NodeScript> path = FindShortestUnweightedPath(startNode, endNode);
+            
+            if (path != null && path.Count > 0)
             {
-                closestItemDistance = distance;
-                closestItem = item;
+                Debug.Log($"NodeScript: Successfully matched path from {startNode.name} to {endNode.name} for {item.name}");
+                return (path, item);
             }
         }
 
-        if (closestItem == null)
+        // Fallback: If the absolute closest node to the player is disconnected, check the next closest nodes
+        Debug.LogWarning("NodeScript: Closest node was entirely disconnected. Trying alternative start nodes.");
+        foreach (NodeScript alternativeStart in allNodesDistSorted.Take(5))
         {
-            return (new List<NodeScript>(), null);
+            foreach (GameObject item in targetItems)
+            {
+                NodeScript endNode = GetClosestNodeToPosition(item.transform.position);
+                if (endNode == null) continue;
+
+                List<NodeScript> path = FindShortestUnweightedPath(alternativeStart, endNode);
+                if (path != null && path.Count > 0)
+                {
+                    return (path, item);
+                }
+            }
         }
 
-        ShelfItemData closestData = closestItem.GetComponent<ShelfItemData>();
-        Debug.Log($"NodeScript: Closest {targetItemType} item is {closestData?.itemType} at {closestItem.name} (distance: {closestItemDistance})");
-
-        // Find closest node to player and closest node to target item
-        NodeScript startNode = GetClosestNodeToPosition(playerPosition);
-        NodeScript endNode = GetClosestNodeToPosition(closestItem.transform.position);
-
-        if (startNode == null || endNode == null)
-        {
-            Debug.LogWarning("NodeScript: Could not find start or end node!");
-            return (new List<NodeScript>(), closestItem);
-        }
-
-        Debug.Log($"NodeScript: Finding path from {startNode.name} to {endNode.name} for item type {targetItemType}");
-
-        // Find the shortest path
-        return (FindShortestUnweightedPath(startNode, endNode), closestItem);
+        Debug.LogWarning($"NodeScript: No reachable path found to any item of type {targetItemType}");
+        return (new List<NodeScript>(), null);
     }
 
     // Keep the old method for backward compatibility
-    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType)
+    public static List<NodeScript> FindPathToClosestItem(Vector3 playerPosition, ItemType targetItemType, Transform searchRoot = null)
     {
-        var result = FindPathToClosestItemWithTarget(playerPosition, targetItemType);
+        var result = FindPathToClosestItemWithTarget(playerPosition, targetItemType, null, null);
         return result.path;
     }
 
