@@ -287,7 +287,7 @@ MonoBehaviour:
   useTagFiltering: 0
   parentToShelf: 0
   yOffset: 0
-  oneIngredientPerShelf: 0
+  oneIngredientPerShelf: 1
   makeItemsPickupable: 1
   interactionLayers:
     m_Bits: 1

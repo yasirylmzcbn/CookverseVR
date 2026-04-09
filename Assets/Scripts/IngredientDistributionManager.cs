@@ -131,28 +131,41 @@ public class IngredientDistributionManager : MonoBehaviour
 
         if (organizedMode)
         {
-            // Get all ingredient types from the ItemType enum
-            ItemType[] allIngredients = (ItemType[])System.Enum.GetValues(typeof(ItemType));
-            
-            if (allIngredients.Length != allShelves.Count)
+            // Build a pool of ONLY the ingredients that actually have prefabs assigned in the ShelfItemsManager
+            List<ItemType> availableIngredients = new List<ItemType>();
+            if (shelfManager.shelfItemPrefabs != null)
             {
-                Debug.LogWarning($"IngredientDistributionManager: Ingredient count ({allIngredients.Length}) doesn't match shelf count ({allShelves.Count})!");
+                foreach (GameObject prefab in shelfManager.shelfItemPrefabs)
+                {
+                    if (prefab == null) continue;
+                    ShelfItemData itemData = prefab.GetComponent<ShelfItemData>();
+                    if (itemData != null && !availableIngredients.Contains(itemData.itemType))
+                    {
+                        availableIngredients.Add(itemData.itemType);
+                    }
+                }
+            }
+
+            // Fallback just in case
+            if (availableIngredients.Count == 0)
+            {
+                availableIngredients = new List<ItemType>((ItemType[])System.Enum.GetValues(typeof(ItemType)));
             }
 
             // Create a shuffled list of ingredients
-            List<ItemType> ingredientPool = new List<ItemType>(allIngredients);
+            List<ItemType> ingredientPool = availableIngredients;
             ShuffleList(ingredientPool);
 
             // Create mapping of shelf to ingredient type
             Dictionary<Transform, ItemType> shelfToIngredientMap = new Dictionary<Transform, ItemType>();
 
-            // Assign ingredients to shelves (one-to-one mapping)
-            int assignmentCount = Mathf.Min(allShelves.Count, ingredientPool.Count);
-            for (int i = 0; i < assignmentCount; i++)
+            // Assign ingredients to shelves (wrapping around if more shelves than ingredients)
+            for (int i = 0; i < allShelves.Count; i++)
             {
                 if (allShelves[i] == null) continue;
 
-                ItemType ingredientToAssign = ingredientPool[i];
+                // Use modulo to wrap around the ingredient pool
+                ItemType ingredientToAssign = ingredientPool[i % ingredientPool.Count];
                 shelfToIngredientMap[allShelves[i]] = ingredientToAssign;
                 Debug.Log($"IngredientDistributionManager: Assigned {ingredientToAssign} to shelf {allShelves[i].name}");
             }
@@ -160,7 +173,7 @@ public class IngredientDistributionManager : MonoBehaviour
             // Apply the mapping to the shelf manager
             shelfManager.SetIngredientMapping(shelfToIngredientMap);
 
-            Debug.Log($"IngredientDistributionManager: Distributed {assignmentCount} ingredient types across {allShelves.Count} shelves");
+            Debug.Log($"IngredientDistributionManager: Distributed {allShelves.Count} assignments across {allShelves.Count} shelves using {ingredientPool.Count} unique ingredients");
         }
         else
         {
