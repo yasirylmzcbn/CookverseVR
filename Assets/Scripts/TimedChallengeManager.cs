@@ -15,6 +15,17 @@ public class TimedChallengeManager : MonoBehaviour
     [SerializeField] public TextMeshProUGUI timerText;
     [SerializeField] public TextMeshProUGUI targetText;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip startSound;
+    [SerializeField] private AudioClip correctSound;
+    [SerializeField] private AudioClip wrongSound;
+    [SerializeField] private AudioClip winSound;
+    [SerializeField] private AudioClip failSound;
+
+    [SerializeField] private Color warningColor = Color.red;
+    [SerializeField] private Color normalColor = Color.white;
+
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
     public IngredientDistributionManager ingredientDistribution;
@@ -60,7 +71,20 @@ public class TimedChallengeManager : MonoBehaviour
 
         timer -= Time.deltaTime;
         if (timer < 0f) timer = 0f;
-        timerText.text = "Time: " + timer.ToString("F1");
+
+        if (timerText != null)
+        {
+            timerText.text = "Time: " + timer.ToString("F1");
+            if (timer <= 10f)
+            {
+                timerText.color = warningColor;
+            }
+            else
+            {
+                // Reset to normal color if the challenge restarts
+                timerText.color = normalColor;
+            }
+        }
 
         if (timer <= 0f)
         {
@@ -99,6 +123,7 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = true;
         timer = challengeDuration;
         roundsWon = 0;
+        audioSource.PlayOneShot(startSound);
 
         // Show navigation nodes
         NodeScript.SetAllNodesVisible(true);
@@ -199,6 +224,7 @@ public class TimedChallengeManager : MonoBehaviour
         if (collectedItem == currentTarget)
         {
             roundsWon++;
+            audioSource.PlayOneShot(correctSound);
 
             if (roundsWon >= roundsRequired)
             {
@@ -210,6 +236,10 @@ public class TimedChallengeManager : MonoBehaviour
                 PickNewTarget();
             }
         }
+        else if(collectedItem != currentTarget)
+        {
+            audioSource.PlayOneShot(wrongSound);
+        }
     }
 
     // Win Condition: complete 3 rounds within the time limit
@@ -218,6 +248,7 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = false;
         targetText.text = "Success!";
         Debug.Log("SUCCESS");
+        audioSource.PlayOneShot(winSound);
 
         // Hide path and nodes
         NavigationPathVisualizer.HidePath();
@@ -233,6 +264,7 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = false;
         targetText.text = "Failed!";
         Debug.Log("FAILED");
+        audioSource.PlayOneShot(failSound);
 
         // Hide path and nodes
         NavigationPathVisualizer.HidePath();
