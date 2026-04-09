@@ -25,6 +25,9 @@ public class KitchenTimerManager : MonoBehaviour
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
 
+    [SerializeField] private Color warningColor = Color.red;
+    [SerializeField] private Color normalColor = Color.white;
+
     private float timer;
     private bool challengeActive;
     private int zonesCompleted;
@@ -57,7 +60,18 @@ public class KitchenTimerManager : MonoBehaviour
         if (timer < 0f) timer = 0f;
 
         if (timerText != null)
+        {
             timerText.text = "Time: " + timer.ToString("F1");
+            if (timer <= 10f)
+            {
+                timerText.color = warningColor;
+            }
+            else
+            {
+                // Reset to normal color if the challenge restarts
+                timerText.color = normalColor;
+            }
+        }
 
         if (timer <= 0f)
         {

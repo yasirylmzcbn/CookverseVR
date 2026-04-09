@@ -23,6 +23,9 @@ public class TimedChallengeManager : MonoBehaviour
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
 
+    [SerializeField] private Color warningColor = Color.red;
+    [SerializeField] private Color normalColor = Color.white;
+
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
     public IngredientDistributionManager ingredientDistribution;
@@ -68,7 +71,20 @@ public class TimedChallengeManager : MonoBehaviour
 
         timer -= Time.deltaTime;
         if (timer < 0f) timer = 0f;
-        timerText.text = "Time: " + timer.ToString("F1");
+
+        if (timerText != null)
+        {
+            timerText.text = "Time: " + timer.ToString("F1");
+            if (timer <= 10f)
+            {
+                timerText.color = warningColor;
+            }
+            else
+            {
+                // Reset to normal color if the challenge restarts
+                timerText.color = normalColor;
+            }
+        }
 
         if (timer <= 0f)
         {
