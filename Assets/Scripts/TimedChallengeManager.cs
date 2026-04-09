@@ -1,7 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
-using Oculus.Haptics;
+using UnityEngine.XR;
 
 public class TimedChallengeManager : MonoBehaviour
 {
@@ -23,12 +23,10 @@ public class TimedChallengeManager : MonoBehaviour
     [SerializeField] private AudioClip wrongSound;
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
-    [SerializeField] private HapticClip hapticClip;
+    [SerializeField] private AudioClip clockTickSound;
 
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private Color normalColor = Color.white;
-
-    private HapticClipPlayer clipPlayer;
 
     [Header("Ingredient Distribution")]
     [Tooltip("Optional: Manager that handles ingredient distribution across shelves")]
@@ -62,13 +60,14 @@ public class TimedChallengeManager : MonoBehaviour
 
     private float lastPathUpdateTime;
     private Vector3 lastPlayerPosition;
+    private float tickAccumulator = 0f;
 
     // Track items that the challenge has already directed the user to
     private HashSet<GameObject> usedTargetItems = new HashSet<GameObject>();
 
     private void Start()
     {
-        clipPlayer = new HapticClipPlayer(hapticClip);
+        // No longer using Oculus HapticClipPlayer
     }
 
     private void Awake()
@@ -105,6 +104,8 @@ public class TimedChallengeManager : MonoBehaviour
             }
         }
 
+        UpdateClockTick();
+
         if (timer <= 0f)
         {
             ChallengeFailed();
@@ -117,6 +118,26 @@ public class TimedChallengeManager : MonoBehaviour
         }
 
         UpdateHaptics();
+    }
+
+    private void UpdateClockTick()
+    {
+        if (clockTickSound == null || audioSource == null || timer <= 0f) return;
+
+        float tickInterval;
+        if (timer <= 2f) tickInterval = 1f / 8f;
+        else if (timer <= 5f) tickInterval = 1f / 4f;
+        else if (timer <= 10f) tickInterval = 1f / 2f;
+        else tickInterval = 1f;
+
+        tickAccumulator += Time.deltaTime;
+        if (tickAccumulator >= tickInterval)
+        {
+            tickAccumulator -= tickInterval;
+            
+            // Adjust pitch slightly to make faster ticks feel more urgent, or just play normally
+            audioSource.PlayOneShot(clockTickSound);
+        }
     }
 
     // Check if we should update the path based on time and distance thresholds
@@ -161,25 +182,40 @@ public class TimedChallengeManager : MonoBehaviour
                 Vector3 directionToTarget = (cachedTargetItem.transform.position - actualPlayerTransform.position).normalized;
                 float dotRight = Vector3.Dot(actualPlayerTransform.right, directionToTarget);
 
-                if (clipPlayer != null)
-                {
-                    clipPlayer.amplitude = intensity;
-                    
-                    if (dotRight < -0.1f)
-                    {
-                        clipPlayer.Play(Controller.Left);
-                    }
-                    else if (dotRight > 0.1f)
-                    {
-                        clipPlayer.Play(Controller.Right);
-                    }
-                    else
-                    {
-                        clipPlayer.Play(Controller.Both);
-                    }
-                }
+                SetControllerHaptic(dotRight, intensity, hapticPulseInterval);
             }
             lastHapticTime = Time.time;
+        }
+    }
+
+    private void SetControllerHaptic(float dotRight, float intensity, float duration)
+    {
+        List<InputDevice> leftDevices = new List<InputDevice>();
+        List<InputDevice> rightDevices = new List<InputDevice>();
+        
+        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Left | InputDeviceCharacteristics.Controller, leftDevices);
+        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Right | InputDeviceCharacteristics.Controller, rightDevices);
+
+        if (dotRight < -0.1f) // Target is to the left
+        {
+            foreach (var leftDevice in leftDevices)
+                if (leftDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    leftDevice.SendHapticImpulse(0u, intensity, duration);
+        }
+        else if (dotRight > 0.1f) // Target is to the right
+        {
+            foreach (var rightDevice in rightDevices)
+                if (rightDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    rightDevice.SendHapticImpulse(0u, intensity, duration);
+        }
+        else // Center
+        {
+            foreach (var leftDevice in leftDevices)
+                if (leftDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    leftDevice.SendHapticImpulse(0u, intensity, duration);
+            foreach (var rightDevice in rightDevices)
+                if (rightDevice.TryGetHapticCapabilities(out HapticCapabilities caps) && caps.supportsImpulse)
+                    rightDevice.SendHapticImpulse(0u, intensity, duration);
         }
     }
 
@@ -191,6 +227,7 @@ public class TimedChallengeManager : MonoBehaviour
         challengeActive = true;
         timer = challengeDuration;
         roundsWon = 0;
+        tickAccumulator = 0f;
         usedTargetItems.Clear(); // Reset used items whenever a new challenge starts
         audioSource.PlayOneShot(startSound);
 
@@ -369,11 +406,9 @@ public class TimedChallengeManager : MonoBehaviour
         NodeScript.SetAllNodesVisible(false);
 
         audioSource.PlayOneShot(winSound);
-        if (clipPlayer != null)
-        {
-            clipPlayer.amplitude = 1f;
-            clipPlayer.Play(Controller.Both);
-        }
+        
+        // Play final success vibration
+        SetControllerHaptic(0f, 1f, 1f);
 
         // Hide after 2 seconds
         Invoke("HideUI", 2f);

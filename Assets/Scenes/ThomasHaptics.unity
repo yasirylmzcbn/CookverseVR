@@ -293,6 +293,7 @@ MonoBehaviour:
     m_Bits: 1
   movementType: 2
   enableThrowing: 1
+  spawnedItems: []
 --- !u!4 &5618448 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3150293545552987023, guid: 1aa95a484ab6341eab462646d7fc3275, type: 3}
@@ -27952,6 +27953,7 @@ MonoBehaviour:
   wrongSound: {fileID: 8300000, guid: c4399397d45d3c243884aab6ee55e1f2, type: 3}
   winSound: {fileID: 8300000, guid: 8fda29abd0778eb4eb38622350a87b12, type: 3}
   failSound: {fileID: 8300000, guid: e6339d71febfa874eb4e96e99a24042b, type: 3}
+  clockTickSound: {fileID: 0}
   hapticClip: {fileID: 0}
   warningColor: {r: 1, g: 0, b: 0, a: 1}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
@@ -27960,6 +27962,8 @@ MonoBehaviour:
   showPathToTarget: 1
   pathUpdateInterval: 0.5
   pathUpdateDistanceThreshold: 1
+  hapticMaxDistance: 5
+  hapticPulseInterval: 0.2
 --- !u!4 &1428933268
 Transform:
   m_ObjectHideFlags: 0
