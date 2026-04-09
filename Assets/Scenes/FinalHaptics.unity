@@ -26587,6 +26587,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2053331556}
     - target: {fileID: 764578724342004436, guid: 24d52411d04904314a9d21663c197d35, type: 3}
+      propertyPath: clockTickSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 2a59914ed0d511f40bc1270ae472dd27, type: 3}
+    - target: {fileID: 764578724342004436, guid: 24d52411d04904314a9d21663c197d35, type: 3}
       propertyPath: instructionText
       value: 
       objectReference: {fileID: 1871396527}

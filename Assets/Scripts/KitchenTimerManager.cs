@@ -21,6 +21,7 @@ public class KitchenTimerManager : MonoBehaviour
     [SerializeField] private AudioClip startSound;
     [SerializeField] private AudioClip winSound;
     [SerializeField] private AudioClip failSound;
+    [SerializeField] private AudioClip clockTickSound;
     private HapticClipPlayer clipPlayer;
 
     [SerializeField] private Color warningColor = Color.red;
@@ -29,6 +30,7 @@ public class KitchenTimerManager : MonoBehaviour
     private float timer;
     private bool challengeActive;
     private int zonesCompleted;
+    private float tickAccumulator;
 
     private void Start()
     {
@@ -71,12 +73,33 @@ public class KitchenTimerManager : MonoBehaviour
             }
         }
 
+        UpdateClockTick();
+
         if (timer <= 0f)
         {
             ChallengeFailed();
             return;
         }
     }
+
+    private void UpdateClockTick()
+    {
+        if (clockTickSound == null || audioSource == null || timer <= 0f) return;
+
+        float tickInterval;
+        if (timer <= 2f) tickInterval = 1f / 8f;
+        else if (timer <= 5f) tickInterval = 1f / 4f;
+        else if (timer <= 10f) tickInterval = 1f / 2f;
+        else tickInterval = 1f;
+
+        tickAccumulator += Time.deltaTime;
+        if (tickAccumulator >= tickInterval)
+        {
+            tickAccumulator -= tickInterval;
+            audioSource.PlayOneShot(clockTickSound);
+        }
+    }
+
     public void StartChallenge()
     {
         if (challengeActive) return;
@@ -84,6 +107,7 @@ public class KitchenTimerManager : MonoBehaviour
         challengeActive = true;
         timer = challengeDuration;
         zonesCompleted = 0;
+        tickAccumulator = 0f;
 
         Debug.Log("Challenge Started");
 
