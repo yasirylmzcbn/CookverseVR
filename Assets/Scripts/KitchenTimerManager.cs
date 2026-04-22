@@ -124,7 +124,7 @@ public class KitchenTimerManager : MonoBehaviour
         if (instructionText != null)
         {
             instructionText.gameObject.SetActive(true);
-            instructionText.text = "Place items in correct zones!";
+            instructionText.text = "Chop, cook, serve! Use the knife!";
         }
 
         // Reset all zones

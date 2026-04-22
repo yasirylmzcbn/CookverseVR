@@ -105,13 +105,4 @@ public class KnifeController : MonoBehaviour
             }
         }
     }
-
-    // void OnDrawGizmos()
-    // {
-    //     if (bladeTip == null || bladeBase == null) return;
-    //     Gizmos.color = Color.red;
-    //     Vector3 bladeCenter = (bladeTip.position + bladeBase.position) / 2f;
-    //     Gizmos.matrix = Matrix4x4.TRS(bladeCenter, transform.rotation, Vector3.one);
-    //     Gizmos.DrawWireCube(Vector3.zero, bladeHalfExtents * 2f);
-    // }
 }
