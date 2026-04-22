@@ -12096,12 +12096,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6644940827918189316, guid: bc3a8cdf2cc2749d5bbf3e217e6462f5, type: 3}
       propertyPath: m_text
-      value: 'Chop all the ingredients!
-
-        Cook them using the stove!
-
-        Bring
-        all 3 items to the correct zone!'
+      value: Chop! Cook! Serve!
       objectReference: {fileID: 0}
     - target: {fileID: 8580305134589896035, guid: bc3a8cdf2cc2749d5bbf3e217e6462f5, type: 3}
       propertyPath: m_Name
@@ -34545,8 +34540,6 @@ MonoBehaviour:
   ingredientLayer:
     serializedVersion: 2
     m_Bits: 0
-  chopHapticAmplitude: 0.7
-  chopHapticDuration: 0.12
 --- !u!65 &1714423289
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -37844,12 +37837,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Chop all the ingredients!
-
-    Cook them using the stove!
-
-    Bring all
-    3 items to the correct zone!'
+  m_text: Chop! Cook! Serve!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 9ad269c99dcf42b7aedefd83dd5a7b9d, type: 2}
