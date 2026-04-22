@@ -56,30 +56,32 @@ public class KitchenTimerManager : MonoBehaviour
     {
         if (!challengeActive) return;
 
-        timer -= Time.deltaTime;
-        if (timer < 0f) timer = 0f;
+        timer += Time.deltaTime;
 
         if (timerText != null)
         {
-            timerText.text = "Time: " + timer.ToString("F1");
-            if (timer <= 10f)
-            {
-                timerText.color = warningColor;
-            }
-            else
-            {
-                // Reset to normal color if the challenge restarts
-                timerText.color = normalColor;
-            }
+            int minutes = Mathf.FloorToInt(timer / 60f);
+            int seconds = Mathf.FloorToInt(timer % 60f);
+            timerText.text = $"Time: {minutes:00}:{seconds:00}";
+            //timerText.text = "Time: " + timer.ToString("F1");
+            //if (timer <= 10f)
+            //{
+            //    timerText.color = warningColor;
+            //}
+            //else
+            //{
+            //    // Reset to normal color if the challenge restarts
+            //    timerText.color = normalColor;
+            //}
         }
 
-        UpdateClockTick();
+        //UpdateClockTick();
 
-        if (timer <= 0f)
-        {
-            ChallengeFailed();
-            return;
-        }
+        //if (timer <= 0f)
+        //{
+        //    ChallengeFailed();
+        //    return;
+        //}
     }
 
     private void UpdateClockTick()
@@ -105,7 +107,8 @@ public class KitchenTimerManager : MonoBehaviour
         if (challengeActive) return;
 
         challengeActive = true;
-        timer = challengeDuration;
+        //timer = challengeDuration;
+        timer = 0f;
         zonesCompleted = 0;
         tickAccumulator = 0f;
 
