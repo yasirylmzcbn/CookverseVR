@@ -12,10 +12,18 @@ public class KnifeController : MonoBehaviour
     private Rigidbody rb;
 
     [Header("Haptics")]
+    [SerializeField] private bool enableHaptics = true;
+    [SerializeField] private bool sendHapticOnGrab = true;
+    [SerializeField] private bool sendHapticOnRelease = true;
+    [SerializeField] private float grabHapticAmplitude = 0.5f;
+    [SerializeField] private float grabHapticDuration = 0.08f;
+    [SerializeField] private float releaseHapticAmplitude = 0.35f;
+    [SerializeField] private float releaseHapticDuration = 0.06f;
     [SerializeField] private float chopHapticAmplitude = 0.7f;
     [SerializeField] private float chopHapticDuration = 0.12f;
 
     private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable _knifeGrab;
+    private bool isGrabEventHooked;
 
     void Start()
     {
@@ -31,6 +39,87 @@ public class KnifeController : MonoBehaviour
         if (_knifeGrab == null)
         {
             Debug.LogError("yasir123 XRGrabInteractable not found on knife or parent!");
+        }
+
+        RegisterGrabEvents();
+    }
+
+    private void OnEnable()
+    {
+        RegisterGrabEvents();
+    }
+
+    private void OnDisable()
+    {
+        UnregisterGrabEvents();
+    }
+
+    private void OnDestroy()
+    {
+        UnregisterGrabEvents();
+    }
+
+    private void RegisterGrabEvents()
+    {
+        if (isGrabEventHooked)
+            return;
+
+        if (_knifeGrab == null)
+            _knifeGrab = GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+
+        if (_knifeGrab == null)
+            return;
+
+        _knifeGrab.selectEntered.AddListener(OnGrabbed);
+        _knifeGrab.selectExited.AddListener(OnReleased);
+        isGrabEventHooked = true;
+    }
+
+    private void UnregisterGrabEvents()
+    {
+        if (!isGrabEventHooked || _knifeGrab == null)
+            return;
+
+        _knifeGrab.selectEntered.RemoveListener(OnGrabbed);
+        _knifeGrab.selectExited.RemoveListener(OnReleased);
+        isGrabEventHooked = false;
+    }
+
+    private void OnGrabbed(SelectEnterEventArgs args)
+    {
+        if (!enableHaptics || !sendHapticOnGrab)
+            return;
+
+        SendHapticToInteractor(args.interactorObject, grabHapticAmplitude, grabHapticDuration);
+    }
+
+    private void OnReleased(SelectExitEventArgs args)
+    {
+        if (!enableHaptics || !sendHapticOnRelease)
+            return;
+
+        SendHapticToInteractor(args.interactorObject, releaseHapticAmplitude, releaseHapticDuration);
+    }
+
+    private void SendHapticToInteractor(UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor interactor, float amplitude, float duration)
+    {
+        if (interactor == null)
+            return;
+
+        amplitude = Mathf.Clamp01(amplitude);
+        duration = Mathf.Max(0f, duration);
+
+        if (interactor is UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInputInteractor inputInteractor)
+        {
+            inputInteractor.SendHapticImpulse(amplitude, duration);
+            return;
+        }
+
+        if (interactor is Component interactorComponent)
+        {
+            var hapticPlayer = interactorComponent.GetComponentInParent<UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics.HapticImpulsePlayer>(true);
+            if (hapticPlayer != null)
+                hapticPlayer.SendHapticImpulse(amplitude, duration);
         }
     }
 
